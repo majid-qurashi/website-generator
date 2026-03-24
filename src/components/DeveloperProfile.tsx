@@ -1,13 +1,13 @@
 export default function DeveloperProfile() {
   return (
-    <section className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 py-20">
+    <section className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 py-20 transition-colors duration-300">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
             About the Developer
           </h1>
-          <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full"></div>
+          <div className="h-1 w-20 bg-blue-600 dark:bg-blue-500 mx-auto rounded-full"></div>
         </div>
 
         {/* Main Content */}
@@ -16,7 +16,7 @@ export default function DeveloperProfile() {
           <div className="flex justify-center md:col-span-1">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl transform rotate-6 blur-xl opacity-30"></div>
-              <div className="relative bg-white p-2 rounded-2xl shadow-2xl">
+            <div className="relative bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-2xl dark:shadow-gray-700/50">
                 <img
                   src="https://edunetfoundation.org/wp-content/uploads/2026/01/Majid-Yaseen-Qurashi.webp"
                   alt="Majid Yaseen Qurashi"
@@ -30,16 +30,16 @@ export default function DeveloperProfile() {
           <div className="md:col-span-2">
             {/* Name and Title */}
             <div className="mb-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">Majid Yaseen Qurashi</h2>
-              <p className="text-xl text-blue-600 font-semibold">Full Stack Developer & Tech Entrepreneur</p>
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">Majid Yaseen Qurashi</h2>
+              <p className="text-xl text-blue-600 dark:text-blue-400 font-semibold">Full Stack Developer & Tech Entrepreneur</p>
             </div>
 
             {/* About Text */}
-            <div className="space-y-6 text-gray-700 leading-relaxed">
+            <div className="space-y-6 text-gray-700 dark:text-gray-300 leading-relaxed">
               <p className="text-lg">
-                I am <span className="font-semibold text-gray-900">Majid Yaseen Qurashi</span>, a passionate final-year BTech student specializing in 
-                <span className="font-semibold text-gray-900"> Computer Science & Engineering</span> at 
-                <span className="font-semibold text-gray-900"> Government College of Engineering & Technology (GCET)</span>, Safapora, Kashmir.
+                I am <span className="font-semibold text-gray-900 dark:text-white">Majid Yaseen Qurashi</span>, a passionate final-year BTech student specializing in 
+                <span className="font-semibold text-gray-900 dark:text-white"> Computer Science & Engineering</span> at 
+                <span className="font-semibold text-gray-900 dark:text-white"> Government College of Engineering & Technology (GCET)</span>, Safapora, Kashmir.
               </p>
 
               <p>
@@ -49,7 +49,7 @@ export default function DeveloperProfile() {
               </p>
 
               <p>
-                <span className="font-semibold text-gray-900">School Website Builder</span> is a project I am leading to gain practical 
+                <span className="font-semibold text-gray-900 dark:text-white">School Website Builder</span> is a project I am leading to gain practical 
                 experience in full-stack development, product design, and project management. This project demonstrates my ability to 
                 translate ideas into functional web applications using modern technologies like React, Next.js, TypeScript, and Tailwind CSS.
               </p>
@@ -60,19 +60,19 @@ export default function DeveloperProfile() {
 
               <ul className="space-y-3 ml-4">
                 <li className="flex gap-3">
-                  <span className="text-blue-600 font-bold">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">✓</span>
                   <span>Develop practical skills in modern web development frameworks and tools</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-blue-600 font-bold">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">✓</span>
                   <span>Create a valuable product that benefits the education sector</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-blue-600 font-bold">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">✓</span>
                   <span>Build a portfolio showcasing real-world project experience</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-blue-600 font-bold">✓</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold">✓</span>
                   <span>Contribute to the digital transformation of educational institutions</span>
                 </li>
               </ul>

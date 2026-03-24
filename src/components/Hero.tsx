@@ -13,12 +13,12 @@ export default function Hero() {
 
   return (
     <>
-      <section id="home" className="pt-20 pb-32 bg-gradient-to-br from-blue-50 to-white" suppressHydrationWarning>
+      <section id="home" className="pt-20 pb-32 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 transition-colors duration-300" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div>
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight" suppressHydrationWarning>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight" suppressHydrationWarning>
                 {isMounted ? (
                   <span className="inline-block">
                     {['Build', 'Your', 'School', 'Website', 'in', 'Minutes'].map((word, wordIndex) => {
@@ -47,7 +47,7 @@ export default function Hero() {
                   </span>
                 )}
               </h1>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                 No coding required. Create a professional, modern website for your school in minutes. 
                 Engage parents, showcase achievements, and manage your school's online presence effortlessly.
               </p>
@@ -58,12 +58,12 @@ export default function Hero() {
                 >
                   School Registration
                 </button>
-                <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-3 px-8 rounded-lg transition duration-200">
+                <button className="border-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 font-semibold py-3 px-8 rounded-lg transition duration-200">
                   Learn More
                 </button>
               </div>
               {/* Trust Badges */}
-              <div className="mt-12 text-sm text-gray-600">
+              <div className="mt-12 text-sm text-gray-600 dark:text-gray-400">
                 <p className="mb-3 font-semibold">Limited features available. Project under development.</p>
                 <div className="flex gap-4 text-xs">
                   <div className="flex items-center gap-2">

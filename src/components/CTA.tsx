@@ -8,12 +8,12 @@ export default function CTA() {
 
   return (
     <>
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800">
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-900 dark:to-blue-950 transition-colors duration-300">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Elevate Your School's Online Presence?
           </h2>
-          <p className="text-xl text-blue-100 mb-10 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl text-blue-100 dark:text-blue-200 mb-10 leading-relaxed max-w-2xl mx-auto">
             Join hundreds of schools that have successfully transformed their digital presence with School Website Builder. 
             Create a professional, engaging website for your institution today—no coding skills required.
           </p>
@@ -24,11 +24,11 @@ export default function CTA() {
             >
               Register Your School Now
             </button>
-            <button className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-bold py-4 px-10 rounded-lg transition duration-200 text-lg">
+            <button className="border-2 border-white text-white hover:bg-white hover:text-blue-600 dark:hover:text-blue-900 font-bold py-4 px-10 rounded-lg transition duration-200 text-lg">
               Schedule a Demo
             </button>
           </div>
-          <p className="text-blue-100 text-sm mt-8">
+          <p className="text-blue-100 dark:text-blue-200 text-sm mt-8">
             Every services are free to start.
           </p>
         </div>

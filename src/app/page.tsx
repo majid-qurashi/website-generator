@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <>
       <InaugurationPage onComplete={() => {}} />
-      <main className="min-h-screen bg-white">
+      <main className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
         <Navigation />
         <Hero />
         <Features />

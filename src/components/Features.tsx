@@ -23,14 +23,14 @@ export default function Features() {
   ];
 
   return (
-    <section id="features" className="py-20 bg-white">
+    <section id="features" className="py-20 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Powerful Features for Your School
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-gray-300">
             Everything you need to create and manage your school's online presence
           </p>
         </div>
@@ -40,11 +40,11 @@ export default function Features() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-gray-50 p-8 rounded-xl hover:shadow-lg transition duration-300 transform hover:scale-105"
+              className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl hover:shadow-lg dark:hover:shadow-gray-700/50 transition duration-300 transform hover:scale-105"
             >
               <div className="text-5xl mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>
