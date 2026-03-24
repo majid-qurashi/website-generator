@@ -22,9 +22,15 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
     return () => clearTimeout(timer);
   }, [onComplete]);
 
-  // Only render after hydration is complete
+  // Prevent hydration mismatch by returning a simple div on first render
   if (!isMounted) {
-    return null;
+    return (
+      <div
+        suppressHydrationWarning
+        className="fixed inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 z-50"
+      >
+      </div>
+    );
   }
 
   return (
@@ -42,9 +48,10 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4">
+      <div className="relative z-10 text-center px-4 sm:px-6 md:px-8 max-w-3xl">
+        <div className="animate-scroll-up">
         {/* Logo Animation */}
-        <div className="mb-8 animate-bounce-slow">
+        <div className="mb-6 sm:mb-8 animate-bounce-slow">
           <svg
             width="120"
             height="120"
@@ -83,20 +90,20 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
         </div>
 
         {/* Main Title with Typing Animation */}
-        <div className="mb-6">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 animate-fade-in tracking-tight">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-3 sm:mb-4 animate-fade-in tracking-tight">
             School Website Builder
           </h1>
-          <div className="h-1 w-32 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 mx-auto rounded-full animate-pulse"></div>
+          <div className="h-1 w-24 sm:w-32 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 mx-auto rounded-full animate-pulse"></div>
         </div>
 
         {/* Tagline */}
-        <p className="text-xl md:text-2xl text-blue-100 mb-8 animate-fade-in-delay font-light">
+        <p className="text-base sm:text-lg md:text-2xl text-blue-100 mb-6 sm:mb-8 animate-fade-in-delay font-light">
           Building the Future of Educational Websites
         </p>
 
         {/* Status Badge */}
-        <div className="inline-block mb-12 animate-pulse-slow">
+        <div className="inline-block mb-8 sm:mb-12 animate-pulse-slow">
           <div className="bg-white bg-opacity-20 backdrop-blur-md px-6 py-3 rounded-full border border-white border-opacity-30">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></span>
@@ -106,27 +113,27 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
         </div>
 
         {/* Features Coming Soon */}
-        <div className="grid grid-cols-3 gap-4 mb-12 max-w-md mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-12 max-w-md mx-auto">
           <div className="animate-fade-in-delay-1">
-            <div className="text-2xl mb-2">🎨</div>
-            <p className="text-sm text-blue-100">Beautiful Design</p>
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🎨</div>
+            <p className="text-xs sm:text-sm text-blue-100">Beautiful Design</p>
           </div>
           <div className="animate-fade-in-delay-2">
-            <div className="text-2xl mb-2">⚡</div>
-            <p className="text-sm text-blue-100">Fast & Secure</p>
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">⚡</div>
+            <p className="text-xs sm:text-sm text-blue-100">Fast & Secure</p>
           </div>
-          <div className="animate-fade-in-delay-3">
-            <div className="text-2xl mb-2">🚀</div>
-            <p className="text-sm text-blue-100">Easy to Use</p>
+          <div className="hidden sm:block animate-fade-in-delay-3">
+            <div className="text-xl sm:text-2xl mb-1 sm:mb-2">🚀</div>
+            <p className="text-xs sm:text-sm text-blue-100">Easy to Use</p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8 max-w-xs mx-auto">
+        <div className="mb-6 sm:mb-8 max-w-xs mx-auto">
           <div className="h-1 bg-white bg-opacity-20 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 animate-progress-bar"></div>
           </div>
-          <p className="text-sm text-blue-100 mt-3">Loading...</p>
+          <p className="text-xs sm:text-sm text-blue-100 mt-2 sm:mt-3">Have a patience...</p>
         </div>
 
         {/* Skip Button */}
@@ -135,10 +142,12 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
             setIsComplete(true);
             onComplete();
           }}
-          className="text-blue-100 hover:text-white text-sm underline transition opacity-75 hover:opacity-100 animate-fade-in-delay-4"
+          className="text-xs sm:text-sm text-blue-100 hover:text-white underline transition opacity-75 hover:opacity-100 animate-fade-in-delay-4"
+          suppressHydrationWarning
         >
           Skip → Enter Now
         </button>
+        </div>
       </div>
 
       {/* CSS Animations */}
@@ -197,6 +206,17 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
           }
         }
 
+        @keyframes scroll-up {
+          0% {
+            transform: translateY(150px);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
         .animate-blob {
           animation: blob 7s infinite;
         }
@@ -243,6 +263,10 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
 
         .animate-progress-bar {
           animation: progress-bar 5s ease-in-out forwards;
+        }
+
+        .animate-scroll-up {
+          animation: scroll-up 12s ease-out forwards;
         }
       `}</style>
     </div>

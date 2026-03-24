@@ -113,7 +113,7 @@ export default function Footer() {
         {/* Bottom Footer */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
           <div>
-            <p>&copy; 2024 School Website Builder. All rights reserved.</p>
+            <p>&copy; 2026 School Website Builder. All rights reserved.</p>
           </div>
           <div>
             <p>

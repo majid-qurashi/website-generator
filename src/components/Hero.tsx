@@ -1,20 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SchoolRegistrationModal from './SchoolRegistrationModal';
 
 export default function Hero() {
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <>
-      <section id="home" className="pt-20 pb-32 bg-gradient-to-br from-blue-50 to-white">
+      <section id="home" className="pt-20 pb-32 bg-gradient-to-br from-blue-50 to-white" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div>
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Build Your School Website in Minutes
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight" suppressHydrationWarning>
+                {isMounted ? (
+                  <span className="inline-block">
+                    {['Build', 'Your', 'School', 'Website', 'in', 'Minutes'].map((word, wordIndex) => {
+                      const colors = ['#2563eb', '#a855f7', '#f97316', '#0d9488', '#4f46e5', '#e11d48'];
+                      return (
+                        <span key={wordIndex} className="inline-block animate-word-appear" style={{animationDelay: `${wordIndex * 0.2}s`}}>
+                          <span style={{color: colors[wordIndex]}}>{word[0]}</span>
+                          <span>{word.slice(1)}</span>
+                          {wordIndex < 5 && '\u00A0'}
+                        </span>
+                      );
+                    })}
+                  </span>
+                ) : (
+                  <span className="inline-block">
+                    {['Build', 'Your', 'School', 'Website', 'in', 'Minutes'].map((word, wordIndex) => {
+                      const colors = ['#2563eb', '#a855f7', '#f97316', '#0d9488', '#4f46e5', '#e11d48'];
+                      return (
+                        <span key={wordIndex} className="inline-block animate-word-appear-slow" style={{animationDelay: `${wordIndex * 0.4}s`}}>
+                          <span style={{color: colors[wordIndex]}}>{word[0]}</span>
+                          <span>{word.slice(1)}</span>
+                          {wordIndex < 5 && '\u00A0'}
+                        </span>
+                      );
+                    })}
+                  </span>
+                )}
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 No coding required. Create a professional, modern website for your school in minutes. 
@@ -53,9 +84,9 @@ export default function Hero() {
 
             {/* Right Visual */}
             <div className="relative">
-              <div className="rounded-2xl h-96 overflow-hidden shadow-2xl transform hover:scale-105 transition duration-300">
+              <div className="rounded-2xl h-48 sm:h-64 md:h-96 overflow-hidden shadow-2xl transform hover:scale-105 transition duration-300">
                 <img
-                  src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=700&h=600&fit=crop"
+                  src="https://i.ibb.co/qMBVXr8w/file-000000004f1c71fa872d6a7534c2d24d.png"
                   alt="Website Builder Dashboard"
                   className="w-full h-full object-cover"
                 />
@@ -64,6 +95,29 @@ export default function Hero() {
           </div>
         </div>
       </section>
+
+      <style jsx>{`
+        @keyframes word-appear {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-word-appear {
+          animation: word-appear 0.6s ease-out forwards;
+          display: inline-block;
+        }
+
+        .animate-word-appear-slow {
+          animation: word-appear 1.2s ease-out forwards;
+          display: inline-block;
+        }
+      `}</style>
 
       <SchoolRegistrationModal
         isOpen={isRegistrationOpen}

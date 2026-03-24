@@ -74,18 +74,7 @@ export default function Logo() {
         </linearGradient>
       </defs>
 
-      {/* Decorative Code Brackets at bottom */}
-      <text
-        x="20"
-        y="37"
-        fontSize="2"
-        fill="#2563eb"
-        textAnchor="middle"
-        fontWeight="bold"
-        opacity="0.6"
-      >
-        {'< >'}
-      </text>
+      {/* Decorative Code Brackets at bottom - Removed to prevent hydration mismatch */}
     </svg>
   );
 }
