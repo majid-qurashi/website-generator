@@ -7,7 +7,7 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-gray-100 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -41,11 +41,11 @@ export default function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden"
+            className="md:hidden text-black"
             onClick={() => setIsOpen(!isOpen)}
           >
             <svg
-              className="w-6 h-6"
+              className="w-6 h-6 text-black"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -72,8 +72,8 @@ export default function Navigation() {
             <a href="#how-it-works" className="block py-2 text-gray-700 hover:text-blue-600">
               How It Works
             </a>
-            <a href="#pricing" className="block py-2 text-gray-700 hover:text-blue-600">
-              Pricing
+            <a href="/about" className="block py-2 text-gray-700 hover:text-blue-600">
+              Developer
             </a>
             <a href="#contact" className="block py-2 text-gray-700 hover:text-blue-600">
               Contact
