@@ -1,48 +1,79 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SchoolRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+type Step = 'registration' | 'details';
+
 export default function SchoolRegistrationModal({
   isOpen,
   onClose,
 }: SchoolRegistrationModalProps) {
-  const [formData, setFormData] = useState({
+  const [step, setStep] = useState<Step>('registration');
+
+  const [registrationData, setRegistrationData] = useState({
     schoolName: '',
     schoolEmail: '',
     password: '',
     confirmPassword: '',
   });
 
+  const [detailsData, setDetailsData] = useState({
+    tagline: '',
+    description: '',
+    logo: null as File | null,
+    image: null as File | null,
+  });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const validateForm = () => {
+  useEffect(() => {
+    if (isOpen) {
+      setStep('registration');
+      setRegistrationData({
+        schoolName: '',
+        schoolEmail: '',
+        password: '',
+        confirmPassword: '',
+      });
+      setDetailsData({
+        tagline: '',
+        description: '',
+        logo: null,
+        image: null,
+      });
+      setErrors({});
+      setSubmitted(false);
+    }
+  }, [isOpen]);
+
+  const validateRegistration = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.schoolName.trim()) {
+    if (!registrationData.schoolName.trim()) {
       newErrors.schoolName = 'School name is required';
     }
 
-    if (!formData.schoolEmail.trim()) {
+    if (!registrationData.schoolEmail.trim()) {
       newErrors.schoolEmail = 'School email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.schoolEmail)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registrationData.schoolEmail)) {
       newErrors.schoolEmail = 'Please enter a valid email address';
     }
 
-    if (!formData.password) {
+    if (!registrationData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
+    } else if (registrationData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    if (!formData.confirmPassword) {
+    if (!registrationData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
+    } else if (registrationData.password !== registrationData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
@@ -50,9 +81,32 @@ export default function SchoolRegistrationModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const validateDetails = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!detailsData.tagline.trim()) {
+      newErrors.tagline = 'Tagline is required';
+    }
+
+    if (!detailsData.description.trim()) {
+      newErrors.description = 'Description is required';
+    }
+
+    if (!detailsData.logo) {
+      newErrors.logo = 'School logo is required';
+    }
+
+    if (!detailsData.image) {
+      newErrors.image = 'School image is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setRegistrationData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -65,23 +119,68 @@ export default function SchoolRegistrationModal({
     }
   };
 
+  const handleDetailsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setDetailsData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      setDetailsData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+      // Clear error for this field
+      if (errors[name]) {
+        setErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
+      }
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      setSubmitted(true);
-      // Simulate form submission
-      setTimeout(() => {
-        alert(`Welcome ${formData.schoolName}! Your registration is being processed.`);
-        setFormData({
-          schoolName: '',
-          schoolEmail: '',
-          password: '',
-          confirmPassword: '',
-        });
-        setSubmitted(false);
-        onClose();
-      }, 1500);
+    if (step === 'registration') {
+      if (validateRegistration()) {
+        setStep('details');
+      }
+    } else if (step === 'details') {
+      if (validateDetails()) {
+        setSubmitted(true);
+        // Simulate form submission
+        setTimeout(() => {
+          alert('Your school registration and details have been saved successfully!');
+          setRegistrationData({
+            schoolName: '',
+            schoolEmail: '',
+            password: '',
+            confirmPassword: '',
+          });
+          setDetailsData({
+            tagline: '',
+            description: '',
+            logo: null,
+            image: null,
+          });
+          setStep('registration');
+          setSubmitted(false);
+          onClose();
+        }, 1500);
+      }
     }
   };
 
@@ -99,19 +198,19 @@ export default function SchoolRegistrationModal({
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-10/12 sm:w-full sm:max-w-md max-h-[90vh] overflow-y-auto rounded-2xl">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-8">
+          <div className={`px-6 py-8 ${step === 'registration' ? 'bg-gradient-to-r from-blue-600 to-blue-800' : 'bg-gradient-to-r from-green-600 to-green-800'}`}>
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white mb-1">
-                  Register Your School
+                  {step === 'registration' ? 'Register Your School' : 'Add Your Details'}
                 </h2>
-                <p className="text-blue-100 text-sm">
-                  Get started in just 3 steps
+                <p className={`text-sm ${step === 'registration' ? 'text-blue-100' : 'text-green-100'}`}>
+                  {step === 'registration' ? 'Get started in just 3 steps' : 'Customize your school information, upload logo, add photos, and configure your preferences.'}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="text-white hover:text-blue-100 transition text-2xl font-bold"
+                className="text-white hover:text-gray-200 transition text-2xl font-bold"
               >
                 ×
               </button>
@@ -120,124 +219,200 @@ export default function SchoolRegistrationModal({
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* School Name */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                School Name
-              </label>
-              <input
-                type="text"
-                name="schoolName"
-                value={formData.schoolName}
-                onChange={handleChange}
-                placeholder="e.g., Qurashi's High School"
-                className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-blue-600 transition ${
-                  errors.schoolName ? 'border-red-500' : 'border-gray-200'
-                }`}
-              />
-              {errors.schoolName && (
-                <p className="text-red-500 text-sm mt-1">{errors.schoolName}</p>
-              )}
-            </div>
+            {step === 'registration' ? (
+              <>
+                {/* School Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Name
+                  </label>
+                  <input
+                    type="text"
+                    name="schoolName"
+                    value={registrationData.schoolName}
+                    onChange={handleRegistrationChange}
+                    placeholder="e.g., Qurashi's High School"
+                    className={`w-full px-4 py-3 rounded-lg border-2 placeholder:text-gray-500 focus:outline-none focus:border-blue-600 transition ${
+                      errors.schoolName ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.schoolName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.schoolName}</p>
+                  )}
+                </div>
 
-            {/* School Email */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                School Email
-              </label>
-              <input
-                type="email"
-                name="schoolEmail"
-                value={formData.schoolEmail}
-                onChange={handleChange}
-                placeholder="admin@yourschool.com"
-                className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-blue-600 transition ${
-                  errors.schoolEmail ? 'border-red-500' : 'border-gray-200'
-                }`}
-              />
-              {errors.schoolEmail && (
-                <p className="text-red-500 text-sm mt-1">{errors.schoolEmail}</p>
-              )}
-            </div>
+                {/* School Email */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Email
+                  </label>
+                  <input
+                    type="email"
+                    name="schoolEmail"
+                    value={registrationData.schoolEmail}
+                    onChange={handleRegistrationChange}
+                    placeholder="admin@yourschool.com"
+                    className={`w-full px-4 py-3 rounded-lg border-2 placeholder:text-gray-500 focus:outline-none focus:border-blue-600 transition ${
+                      errors.schoolEmail ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.schoolEmail && (
+                    <p className="text-red-500 text-sm mt-1">{errors.schoolEmail}</p>
+                  )}
+                </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Create Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="At least 6 characters"
-                className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-blue-600 transition ${
-                  errors.password ? 'border-red-500' : 'border-gray-200'
-                }`}
-              />
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-              )}
-            </div>
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Create Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={registrationData.password}
+                    onChange={handleRegistrationChange}
+                    placeholder="At least 6 characters"
+                    className={`w-full px-4 py-3 rounded-lg border-2 placeholder:text-gray-500 focus:outline-none focus:border-blue-600 transition ${
+                      errors.password ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.password && (
+                    <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                  )}
+                </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Re-enter your password"
-                className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-blue-600 transition ${
-                  errors.confirmPassword ? 'border-red-500' : 'border-gray-200'
-                }`}
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
-              )}
-            </div>
+                {/* Confirm Password */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={registrationData.confirmPassword}
+                    onChange={handleRegistrationChange}
+                    placeholder="Re-enter your password"
+                    className={`w-full px-4 py-3 rounded-lg border-2 placeholder:text-gray-500 focus:outline-none focus:border-blue-600 transition ${
+                      errors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                  )}
+                </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={submitted}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed mt-6"
-            >
-              {submitted ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
+                {/* Next Button */}
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 mt-6"
+                >
+                  Next
+                </button>
+
+                {/* Terms */}
+                <p className="text-center text-xs text-gray-600 mt-4">
+                  By registering, you agree to our Terms of Service and Privacy Policy
+                </p>
+              </>
+            ) : (
+              <>
+                {/* Tagline */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Tagline
+                  </label>
+                  <input
+                    type="text"
+                    name="tagline"
+                    value={detailsData.tagline}
+                    onChange={handleDetailsChange}
+                    placeholder="e.g., Excellence in Education"
+                    className={`w-full px-4 py-3 rounded-lg border-2 placeholder:text-gray-500 focus:outline-none focus:border-green-600 transition ${
+                      errors.tagline ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.tagline && (
+                    <p className="text-red-500 text-sm mt-1">{errors.tagline}</p>
+                  )}
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={detailsData.description}
+                    onChange={handleDetailsChange}
+                    placeholder="Brief description of your school..."
+                    rows={4}
+                    className={`w-full px-4 py-3 rounded-lg border-2 placeholder:text-gray-500 focus:outline-none focus:border-green-600 transition resize-none ${
+                      errors.description ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.description && (
+                    <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                  )}
+                </div>
+
+                {/* School Logo */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Logo
+                  </label>
+                  <input
+                    type="file"
+                    name="logo"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-green-600 transition ${
+                      errors.logo ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.logo && (
+                    <p className="text-red-500 text-sm mt-1">{errors.logo}</p>
+                  )}
+                </div>
+
+                {/* School Image */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    School Image
+                  </label>
+                  <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className={`w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-green-600 transition ${
+                      errors.image ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                  />
+                  {errors.image && (
+                    <p className="text-red-500 text-sm mt-1">{errors.image}</p>
+                  )}
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-4 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setStep('registration')}
+                    className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-bold py-3 px-4 rounded-lg transition duration-200"
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Registering...
-                </span>
-              ) : (
-                'Complete Registration'
-              )}
-            </button>
-
-            {/* Terms */}
-            <p className="text-center text-xs text-gray-600 mt-4">
-              By registering, you agree to our Terms of Service and Privacy Policy
-            </p>
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitted}
+                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
+                  >
+                    {submitted ? 'Saving...' : 'Save Details'}
+                  </button>
+                </div>
+              </>
+            )}
           </form>
         </div>
       </div>
