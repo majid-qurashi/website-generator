@@ -163,7 +163,7 @@ export default function SchoolRegistrationModal({
         setSubmitted(true);
         // Simulate form submission
         setTimeout(() => {
-          alert('Your school registration and details have been saved successfully!');
+          alert('Your school registration and details have been saved successfully.You can proceed with next steps of registration!');
           setRegistrationData({
             schoolName: '',
             schoolEmail: '',
