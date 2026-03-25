@@ -1,0 +1,11 @@
+src/components/ContactForm.tsx(9,5): error TS2304: Cannot find name 'setIsSubmitting'.
+src/components/ContactForm.tsx(10,5): error TS2304: Cannot find name 'setSubmitStatus'.
+src/components/ContactForm.tsx(25,9): error TS2304: Cannot find name 'setSubmitStatus'.
+src/components/ContactForm.tsx(29,9): error TS2304: Cannot find name 'setSubmitStatus'.
+src/components/ContactForm.tsx(33,7): error TS2304: Cannot find name 'setSubmitStatus'.
+src/components/ContactForm.tsx(35,7): error TS2304: Cannot find name 'setIsSubmitting'.
+src/components/ContactForm.tsx(76,14): error TS2304: Cannot find name 'submitStatus'.
+src/components/ContactForm.tsx(82,14): error TS2304: Cannot find name 'submitStatus'.
+src/components/ContactForm.tsx(132,25): error TS2304: Cannot find name 'isSubmitting'.
+src/components/ContactForm.tsx(134,19): error TS2304: Cannot find name 'isSubmitting'.
+src/components/ContactForm.tsx(139,16): error TS2304: Cannot find name 'isSubmitting'.
