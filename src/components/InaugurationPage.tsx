@@ -52,41 +52,11 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
         <div className="animate-scroll-up">
         {/* Logo Animation */}
         <div className="mb-6 sm:mb-8 animate-bounce-slow">
-          <svg
-            width="120"
-            height="120"
-            viewBox="0 0 40 40"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="mx-auto w-fit drop-shadow-2xl"
-          >
-            {/* School Building Logo */}
-            <circle cx="20" cy="20" r="20" fill="white" opacity="0.1" />
-            <path
-              d="M20 6L8 14V34H32V14L20 6Z"
-              fill="white"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M8 14L20 6L32 14"
-              fill="none"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-            <circle cx="20" cy="5" r="1.5" fill="#fbbf24" />
-            <line x1="20" y1="6.5" x2="20" y2="12" stroke="#fbbf24" strokeWidth="1.5" />
-            <rect x="11" y="18" width="2.5" height="2.5" fill="white" rx="0.3" />
-            <rect x="11" y="23" width="2.5" height="2.5" fill="white" rx="0.3" />
-            <rect x="11" y="28" width="2.5" height="2.5" fill="white" rx="0.3" />
-            <rect x="26.5" y="18" width="2.5" height="2.5" fill="white" rx="0.3" />
-            <rect x="26.5" y="23" width="2.5" height="2.5" fill="white" rx="0.3" />
-            <rect x="26.5" y="28" width="2.5" height="2.5" fill="white" rx="0.3" />
-            <rect x="18.5" y="28" width="3" height="6" fill="white" rx="0.4" />
-            <circle cx="21" cy="31" r="0.4" fill="#2563eb" />
-          </svg>
+          <img
+            src="https://i.ibb.co/vxTb6KHJ/Chat-GPT-Image-Mar-26-2026-10-36-35-AM.png"
+            alt="School Website Builder Logo"
+            className="mx-auto w-32 h-32 object-contain drop-shadow-2xl rounded-2xl"
+          />
         </div>
 
         {/* Main Title with Typing Animation */}

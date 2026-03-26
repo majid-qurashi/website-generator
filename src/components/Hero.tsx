@@ -18,7 +18,7 @@ export default function Hero() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div>
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight" suppressHydrationWarning>
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight min-h-[144px]">
                 {isMounted ? (
                   <span className="inline-block">
                     {['Build', 'Your', 'School', 'Website', 'in', 'Minutes'].map((word, wordIndex) => {
@@ -33,17 +33,10 @@ export default function Hero() {
                     })}
                   </span>
                 ) : (
-                  <span className="inline-block">
-                    {['Build', 'Your', 'School', 'Website', 'in', 'Minutes'].map((word, wordIndex) => {
-                      const colors = ['#2563eb', '#a855f7', '#f97316', '#0d9488', '#4f46e5', '#e11d48'];
-                      return (
-                        <span key={wordIndex} className="inline-block animate-word-appear-slow" style={{animationDelay: `${wordIndex * 0.4}s`}}>
-                          <span style={{color: colors[wordIndex]}}>{word[0]}</span>
-                          <span>{word.slice(1)}</span>
-                          {wordIndex < 5 && '\u00A0'}
-                        </span>
-                      );
-                    })}
+                  <span className="inline-block flex flex-wrap gap-2 opacity-0" aria-hidden="true">
+                    <span>Build Your</span>
+                    <span>School Website</span>
+                    <span>in Minutes</span>
                   </span>
                 )}
               </h1>
@@ -95,29 +88,6 @@ export default function Hero() {
           </div>
         </div>
       </section>
-
-      <style jsx>{`
-        @keyframes word-appear {
-          0% {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-word-appear {
-          animation: word-appear 0.6s ease-out forwards;
-          display: inline-block;
-        }
-
-        .animate-word-appear-slow {
-          animation: word-appear 1.2s ease-out forwards;
-          display: inline-block;
-        }
-      `}</style>
 
       <SchoolRegistrationModal
         isOpen={isRegistrationOpen}

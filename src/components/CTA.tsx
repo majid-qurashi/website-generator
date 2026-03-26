@@ -14,7 +14,7 @@ export default function CTA() {
             Ready to Elevate Your School's Online Presence?
           </h2>
           <p className="text-xl text-blue-100 dark:text-blue-200 mb-10 leading-relaxed max-w-2xl mx-auto">
-            Join hundreds of schools that have successfully transformed their digital presence with School Website Builder. 
+            Join hundreds of schools that have successfully transformed their digital presence with School Website Builder.
             Create a professional, engaging website for your institution today—no coding skills required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

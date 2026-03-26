@@ -8,8 +8,7 @@ export default function TemplateThree({ onSelect }: TemplateProps) {
   return (
     <div className="group relative flex flex-col bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-md hover:shadow-2xl transition-all duration-500 ease-out transform hover:-translate-y-2">
       {/* Template Header / Window Bar */}
-      <div className="bg-stone-800 dark:bg-black px-4 py-2 flex items-center justify-between border-b 
-border-stone-700">
+      <div className="bg-stone-800 dark:bg-black px-4 py-2 flex items-center justify-between border-b border-stone-700">
         <div className="flex space-x-2">
           <div className="w-2.5 h-2.5 rounded-full bg-stone-600"></div>
           <div className="w-2.5 h-2.5 rounded-full bg-stone-600"></div>

@@ -1,13 +1,16 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
 html.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #030712; /* gray-950 */
+  --foreground: #f9fafb; /* gray-50 */
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -18,8 +21,28 @@ html.dark {
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollbar styles to ensure sidebars change color */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* slate-300 */
+  border-radius: 6px;
+  border: 3px solid var(--background);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: #475569; /* slate-600 */
 }
