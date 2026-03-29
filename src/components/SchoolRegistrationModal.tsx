@@ -138,7 +138,7 @@ export default function SchoolRegistrationModal({
       if (!validateRegistration()) return;
 
       try {
-        const res = await fetch("http://127.0.0.1:5000/register", {
+        const res = await fetch("https://website-generator-backend-xzl1.onrender.com/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -171,7 +171,7 @@ export default function SchoolRegistrationModal({
         if (detailsData.logo) formData.append("logo", detailsData.logo);
         if (detailsData.image) formData.append("image", detailsData.image);
 
-        const res = await fetch("http://127.0.0.1:5000/school-details", {
+        const res = await fetch("https://website-generator-backend-xzl1.onrender.com/school-details", {
           method: "POST",
           body: formData, // the browser automatically sets Content-Type to multipart/form-data
         });
