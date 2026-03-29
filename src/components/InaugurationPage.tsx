@@ -115,7 +115,7 @@ export default function InaugurationPage({ onComplete }: InaugurationPageProps) 
           className="text-xs sm:text-sm text-blue-100 hover:text-white underline transition opacity-75 hover:opacity-100 animate-fade-in-delay-4"
           suppressHydrationWarning
         >
-          Skip → Enter Now
+          Skip → Enter Main Website
         </button>
         </div>
       </div>
