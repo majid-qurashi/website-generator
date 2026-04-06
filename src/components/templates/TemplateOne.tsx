@@ -11,7 +11,7 @@ interface TemplateProps {
 
 const defaultData: SchoolData = {
   email: 'admin@school.com',
-  name: "Qurashi's International School",
+  name: "Qurashi International School",
   tagline: "Excellence in Education",
   description: "Empowering the next generation of leaders with world-class facilities and expert faculty.",
   logo: null,
