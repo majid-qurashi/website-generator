@@ -112,23 +112,42 @@ export default function SchoolRegistrationModal({
   const handleRegistrationStep = async () => {
     if (!validateRegistration()) return;
     setLoading(true);
+    console.log("Starting registration for:", registrationData.schoolEmail);
+    
     try {
-      // Create user in Auth
-      const { error: authError } = await supabase.auth.signUp({
+      // 1. Create user in Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registrationData.schoolEmail,
         password: registrationData.password,
       });
-      if (authError) throw authError;
 
-      // Initial entry
-      await supabase.from('schools').upsert({
+      if (authError) {
+        console.error("Auth Error:", authError);
+        throw authError;
+      }
+
+      console.log("Auth success, starting database upsert...");
+
+      // 2. Initial entry in schools table
+      const { error: dbError } = await supabase.from('schools').upsert({
         email: registrationData.schoolEmail,
         name: registrationData.schoolName,
       }, { onConflict: 'email' });
 
+      if (dbError) {
+        console.error("Database Error (Upsert):", dbError);
+        // Important: If this is an RLS error, it means the table is protected or the user lacks permissions
+        if (dbError.code === '42501') {
+          throw new Error("Security Policy Error: Make sure your Supabase RLS policies allow inserts for the 'schools' table.");
+        }
+        throw dbError;
+      }
+
+      console.log("Database upsert success! Moving to details step.");
       setStep('details');
     } catch (err: any) {
-      alert(err.message || "Registration failed");
+      console.error("Registration Process Failed:", err);
+      alert(err.message || "Registration failed. Check the browser console for details.");
     } finally {
       setLoading(false);
     }
@@ -162,26 +181,36 @@ export default function SchoolRegistrationModal({
 
   const handleTemplateStep = async (templateId: string) => {
     setLoading(true);
+    console.log("Finalizing setup with template:", templateId);
+    
     try {
       let finalLogoUrl = detailsData.logoUrl;
       let finalImageUrl = detailsData.imageUrl;
 
-      // Final Step: Upload Files to Supabase only now
+      // 1. Upload Files to Supabase only now
       if (detailsData.logo) {
         const name = `${Date.now()}-logo`;
         const { error: uploadError } = await supabase.storage.from('school-assets').upload(name, detailsData.logo);
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Logo Upload Error:", uploadError);
+          throw uploadError;
+        }
         finalLogoUrl = supabase.storage.from('school-assets').getPublicUrl(name).data.publicUrl;
       }
       
       if (detailsData.image) {
         const name = `${Date.now()}-hero`;
         const { error: uploadError } = await supabase.storage.from('school-assets').upload(name, detailsData.image);
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Hero Image Upload Error:", uploadError);
+          throw uploadError;
+        }
         finalImageUrl = supabase.storage.from('school-assets').getPublicUrl(name).data.publicUrl;
       }
 
-      // Update DB with final Supabase URLs and selected template
+      console.log("Finalizing database entry with Supabase URLs...");
+
+      // 2. Update DB with final Supabase URLs and selected template
       const { error: updateError } = await supabase.from('schools').update({
         tagline: detailsData.tagline,
         description: detailsData.description,
@@ -190,12 +219,17 @@ export default function SchoolRegistrationModal({
         template: templateId
       }).eq('email', registrationData.schoolEmail);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Finalization Database Error:", updateError);
+        throw updateError;
+      }
       
+      console.log("Launch Ready! Moving to success screen.");
       setSelectedTemplate(templateId);
       setStep('success');
     } catch (err: any) {
-      alert(err.message || "Failed to finalize setup");
+      console.error("Finalization Failed:", err);
+      alert(err.message || "Failed to finalize setup. Check the browser console (F12) for error codes.");
     } finally {
       setLoading(false);
     }
