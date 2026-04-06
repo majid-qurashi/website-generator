@@ -2,9 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import TemplateOne from './templates/TemplateOne';
-import TemplateTwo from './templates/TemplateTwo';
-import TemplateThree from './templates/TemplateThree';
+import MinimalTemplateOne from '@/components/templates/MinimalTemplateOne';
+import MinimalTemplateTwo from '@/components/templates/MinimalTemplateTwo';
+import MinimalTemplateThree from '@/components/templates/MinimalTemplateThree';
+import MinimalTemplateRP from '@/components/templates/MinimalTemplateRP';
+import TemplateOne from '@/components/templates/TemplateOne';
+import TemplateTwo from '@/components/templates/TemplateTwo';
+import TemplateThree from '@/components/templates/TemplateThree';
+import { SchoolData } from '@/types/school';
 import Link from 'next/link';
 
 interface SchoolRegistrationModalProps {
@@ -38,6 +43,7 @@ export default function SchoolRegistrationModal({
   });
 
   const [selectedTemplate, setSelectedTemplate] = useState('template1');
+  const [activeCategory, setActiveCategory] = useState<'fancy' | 'simple'>('simple');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -112,6 +118,7 @@ export default function SchoolRegistrationModal({
   const handleRegistrationStep = async () => {
     if (!validateRegistration()) return;
     setLoading(true);
+    setErrors({});
     console.log("Starting registration for:", registrationData.schoolEmail);
     
     try {
@@ -123,31 +130,38 @@ export default function SchoolRegistrationModal({
 
       if (authError) {
         console.error("Auth Error:", authError);
-        throw authError;
+        // Special case: User might already exist in Auth but not in our 'schools' DB table
+        if (authError.message.includes('already registered')) {
+          console.warn("User already exists in Auth, attempting to proceed to Database step...");
+        } else {
+          throw authError;
+        }
       }
 
-      console.log("Auth success, starting database upsert...");
+      console.log("Auth step handled, starting database sync...");
 
       // 2. Initial entry in schools table
+      // We use upsert to ensure that if the record exists, we just update/confirm it
       const { error: dbError } = await supabase.from('schools').upsert({
         email: registrationData.schoolEmail,
         name: registrationData.schoolName,
       }, { onConflict: 'email' });
 
       if (dbError) {
-        console.error("Database Error (Upsert):", dbError);
-        // Important: If this is an RLS error, it means the table is protected or the user lacks permissions
+        console.error("Database Sync Error:", dbError);
+        // Important: If this is an RLS error, it means the table is protected
         if (dbError.code === '42501') {
-          throw new Error("Security Policy Error: Make sure your Supabase RLS policies allow inserts for the 'schools' table.");
+          throw new Error("Database Security Error: Permission denied. Check RLS policies.");
         }
         throw dbError;
       }
 
-      console.log("Database upsert success! Moving to details step.");
+      console.log("Registration successful! Moving to details step.");
       setStep('details');
     } catch (err: any) {
-      console.error("Registration Process Failed:", err);
-      alert(err.message || "Registration failed. Check the browser console for details.");
+      console.error("Registration Process Exception:", err);
+      // Give the user a clear alert
+      alert(`⚠️ Registration failed: ${err.message || "Unknown error"}`);
     } finally {
       setLoading(false);
     }
@@ -157,8 +171,9 @@ export default function SchoolRegistrationModal({
     if (!validateDetails()) return;
     
     // Generate local blob URLs for immediate preview without uploading yet
-    const localLogoUrl = detailsData.logo ? URL.createObjectURL(detailsData.logo) : '';
-    const localImageUrl = detailsData.image ? URL.createObjectURL(detailsData.image) : '';
+    // Using a safe check for SSR (though this is a 'use client' component)
+    const localLogoUrl = (detailsData.logo && typeof window !== 'undefined') ? URL.createObjectURL(detailsData.logo) : '';
+    const localImageUrl = (detailsData.image && typeof window !== 'undefined') ? URL.createObjectURL(detailsData.image) : '';
     
     setDetailsData(prev => ({ ...prev, logoUrl: localLogoUrl, imageUrl: localImageUrl }));
     setStep('template');
@@ -254,7 +269,7 @@ export default function SchoolRegistrationModal({
               <h2 className="text-2xl font-bold mb-1">
                 {step === 'registration' && 'Register Your School'}
                 {step === 'details' && 'Customize Your Design'}
-                {step === 'template' && 'Pick Your Style'}
+                {step === 'template' && 'Pick Your Template'}
                 {step === 'success' && 'Ready to Launch!'}
               </h2>
               <p className="text-sm opacity-90">
@@ -307,15 +322,19 @@ export default function SchoolRegistrationModal({
                   <textarea name="description" value={detailsData.description} onChange={handleDetailsChange} rows={3} placeholder="A short description for your website..." className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 focus:border-emerald-500 outline-none transition resize-none"></textarea>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                   <div className="relative group/file overflow-hidden rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-4 text-center hover:bg-slate-50 transition-colors">
+                   <div className={`relative group/file overflow-hidden rounded-xl border-2 border-dashed p-4 text-center transition-all ${detailsData.logo ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30' : 'border-gray-200 dark:border-gray-800 hover:bg-slate-50'}`}>
                       <input type="file" name="logo" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-                      <div className="text-2xl mb-1">📐</div>
-                      <div className="text-[10px] font-bold uppercase text-gray-400">School Logo</div>
+                      <div className="text-2xl mb-1">{detailsData.logo ? '✅' : '📐'}</div>
+                      <div className={`text-[10px] font-bold uppercase ${detailsData.logo ? 'text-emerald-600' : 'text-gray-400'}`}>
+                        {detailsData.logo ? 'Logo Uploaded ✓' : 'Add Logo'}
+                      </div>
                    </div>
-                   <div className="relative group/file overflow-hidden rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-4 text-center hover:bg-slate-50 transition-colors">
+                   <div className={`relative group/file overflow-hidden rounded-xl border-2 border-dashed p-4 text-center transition-all ${detailsData.image ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30' : 'border-gray-200 dark:border-gray-800 hover:bg-slate-50'}`}>
                       <input type="file" name="image" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-                      <div className="text-2xl mb-1">🖼️</div>
-                      <div className="text-[10px] font-bold uppercase text-gray-400">School Photo</div>
+                      <div className="text-2xl mb-1">{detailsData.image ? '✅' : '🖼️'}</div>
+                      <div className={`text-[10px] font-bold uppercase ${detailsData.image ? 'text-emerald-600' : 'text-gray-400'}`}>
+                         {detailsData.image ? 'Photo Uploaded ✓' : 'Add School Photo'}
+                      </div>
                    </div>
                 </div>
                 <div className="flex gap-4 pt-4">
@@ -329,28 +348,60 @@ export default function SchoolRegistrationModal({
 
             {step === 'template' && (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2">
-                  <div className="relative group/card">
-                    <TemplateOne onSelect={() => handleTemplateStep('template1')} data={{ name: registrationData.schoolName, email: registrationData.schoolEmail, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template1' }} />
-                    <button onClick={() => handleFullPreview('template1')} className="absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-800 p-2 rounded-full shadow-lg opacity-0 group-hover/card:opacity-100 transition-opacity z-50 flex items-center space-x-2 text-[10px] font-bold">
-                       <span>🔍 Full Preview</span>
-                    </button>
-                  </div>
-                  <div className="relative group/card">
-                    <TemplateTwo onSelect={() => handleTemplateStep('template2')} data={{ name: registrationData.schoolName, email: registrationData.schoolEmail, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template2' }} />
-                    <button onClick={() => handleFullPreview('template2')} className="absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-800 p-2 rounded-full shadow-lg opacity-0 group-hover/card:opacity-100 transition-opacity z-50 flex items-center space-x-2 text-[10px] font-bold">
-                       <span>🔍 Full Preview</span>
-                    </button>
-                  </div>
-                  <div className="relative group/card">
-                    <TemplateThree onSelect={() => handleTemplateStep('template3')} data={{ name: registrationData.schoolName, email: registrationData.schoolEmail, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template3' }} />
-                    <button onClick={() => handleFullPreview('template3')} className="absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-800 p-2 rounded-full shadow-lg opacity-0 group-hover/card:opacity-100 transition-opacity z-50 flex items-center space-x-2 text-[10px] font-bold">
-                       <span>🔍 Full Preview</span>
-                    </button>
-                  </div>
+                {/* Category Switcher */}
+                <div className="flex justify-center mb-8 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl w-fit mx-auto border border-gray-200 dark:border-gray-700">
+                  <button 
+                    onClick={() => setActiveCategory('simple')}
+                    className={`px-8 py-3 rounded-xl font-black transition-all flex items-center space-x-2 ${activeCategory === 'simple' ? 'bg-white dark:bg-gray-900 text-indigo-600 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <span>🏛️ Simple</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveCategory('fancy')}
+                    className={`px-8 py-3 rounded-xl font-black transition-all flex items-center space-x-2 ${activeCategory === 'fancy' ? 'bg-white dark:bg-gray-900 text-indigo-600 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <span>✨ Fancy</span>
+                  </button>
                 </div>
-                <div className="text-center text-slate-400 text-xs animate-pulse">
-                   💡 Hover over a template and click "Full Preview" to see it live!
+
+                {activeCategory === 'simple' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="relative group/card text-left">
+                      <MinimalTemplateOne onSelect={() => handleTemplateStep('minimal1')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal1' } as SchoolData} />
+                      <button onClick={() => handleFullPreview('minimal1')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                    </div>
+                    <div className="relative group/card text-left">
+                       <MinimalTemplateTwo onSelect={() => handleTemplateStep('minimal2')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal2' } as SchoolData} />
+                      <button onClick={() => handleFullPreview('minimal2')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                    </div>
+                    <div className="relative group/card text-left">
+                       <MinimalTemplateThree onSelect={() => handleTemplateStep('minimal3')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal3' } as SchoolData} />
+                      <button onClick={() => handleFullPreview('minimal3')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                    </div>
+                    <div className="relative group/card text-left">
+                       <MinimalTemplateRP onSelect={() => handleTemplateStep('minimal4')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal4' } as SchoolData} />
+                      <button onClick={() => handleFullPreview('minimal4')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="relative group/card text-left">
+                      <TemplateOne onSelect={() => handleTemplateStep('template1')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template1' } as SchoolData} />
+                      <button onClick={() => handleFullPreview('template1')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                    </div>
+                    <div className="relative group/card text-left">
+                      <TemplateTwo onSelect={() => handleTemplateStep('template2')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template2' } as SchoolData} />
+                      <button onClick={() => handleFullPreview('template2')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                    </div>
+                    <div className="relative group/card text-left">
+                      <TemplateThree onSelect={() => handleTemplateStep('template3')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template3' } as SchoolData} />
+                      <button onClick={() => handleFullPreview('template3')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-center text-slate-400 text-xs animate-pulse font-medium">
+                   💡 Choose a category, hover/tap a template and click "Full Preview" to see it live!
                 </div>
               </div>
             )}
@@ -366,7 +417,7 @@ export default function SchoolRegistrationModal({
                 <Link 
                   href={`/school/${registrationData.schoolEmail}`}
                   target="_blank"
-                  className="inline-block bg-indigo-600 text-white font-bold px-10 py-4 rounded-2xl shadow-2xl shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all text-xl"
+                  className="inline-block w-full sm:w-auto bg-indigo-600 text-white font-black px-8 sm:px-12 py-3.5 sm:py-5 rounded-2xl shadow-2xl shadow-indigo-600/30 hover:scale-105 active:scale-95 transition-all text-lg sm:text-2xl"
                 >
                   🚀 Launch Website
                 </Link>

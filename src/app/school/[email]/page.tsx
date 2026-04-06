@@ -1,5 +1,9 @@
 import React from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import MinimalTemplateOne from '@/components/templates/MinimalTemplateOne';
+import MinimalTemplateTwo from '@/components/templates/MinimalTemplateTwo';
+import MinimalTemplateThree from '@/components/templates/MinimalTemplateThree';
+import MinimalTemplateRP from '@/components/templates/MinimalTemplateRP';
 import TemplateOne from '@/components/templates/TemplateOne';
 import TemplateTwo from '@/components/templates/TemplateTwo';
 import TemplateThree from '@/components/templates/TemplateThree';
@@ -41,8 +45,17 @@ export default async function SchoolWebsitePage({ params }: PageProps) {
         return <TemplateTwo {...props} />;
       case 'template3':
         return <TemplateThree {...props} />;
+      case 'minimal1':
+        return <MinimalTemplateOne {...props} />;
+      case 'minimal2':
+        return <MinimalTemplateTwo {...props} />;
+      case 'minimal3':
+        return <MinimalTemplateThree {...props} />;
+      case 'minimal4':
+        return <MinimalTemplateRP {...props} />;
       default:
-        // Fallback to TemplateOne if none selected or unknown
+        // Fallback logic
+        if (school.template?.startsWith('minimal')) return <MinimalTemplateOne {...props} />;
         return <TemplateOne {...props} />;
     }
   };
