@@ -51,9 +51,6 @@ export default function Hero() {
                 >
                   School Registration
                 </button>
-                <button className="border-2 border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 font-semibold py-3 px-8 rounded-lg transition duration-200">
-                  Learn More
-                </button>
               </div>
               {/* Trust Badges */}
               <div className="mt-12 text-sm text-gray-600 dark:text-gray-400">

@@ -160,8 +160,10 @@ export default function SchoolRegistrationModal({
       setStep('details');
     } catch (err: any) {
       console.error("Registration Process Exception:", err);
-      // Give the user a clear alert
-      alert(`⚠️ Registration failed: ${err.message || "Unknown error"}`);
+      // Give the user a clear alert with more details
+      const errorMessage = err.message || "Unknown error";
+      const errorDetails = err.details || "";
+      alert(`⚠️ Registration failed!\n\nMessage: ${errorMessage}\n${errorDetails ? `Details: ${errorDetails}` : ''}\n\nPlease check your internet connection or if the school email is already in use.`);
     } finally {
       setLoading(false);
     }
@@ -303,6 +305,7 @@ export default function SchoolRegistrationModal({
                 <div>
                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 px-1">Confirm Password</label>
                    <input type="password" name="confirmPassword" value={registrationData.confirmPassword} onChange={handleRegistrationChange} className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 focus:border-indigo-500 outline-none transition" />
+                   {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
                 </div>
                 <button onClick={handleRegistrationStep} disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-xl hover:bg-indigo-700 active:scale-[0.98] transition-all mt-4">
                   {loading ? 'Creating Account...' : 'Continue to Design →'}
@@ -368,34 +371,55 @@ export default function SchoolRegistrationModal({
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="relative group/card text-left">
                       <MinimalTemplateOne onSelect={() => handleTemplateStep('minimal1')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal1' } as SchoolData} />
-                      <button onClick={() => handleFullPreview('minimal1')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                      <div className="absolute top-4 right-4 flex space-x-2 z-50 transition-all opacity-100 md:opacity-0 md:group-hover/card:opacity-100">
+                        <button onClick={() => handleFullPreview('minimal1')} className="bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold border border-gray-100 hover:bg-gray-50 transition-colors">Full Preview</button>
+                        <button onClick={() => handleTemplateStep('minimal1')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold hover:bg-emerald-700 transition-colors">Launch Website 🚀</button>
+                      </div>
                     </div>
                     <div className="relative group/card text-left">
                        <MinimalTemplateTwo onSelect={() => handleTemplateStep('minimal2')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal2' } as SchoolData} />
-                      <button onClick={() => handleFullPreview('minimal2')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                      <div className="absolute top-4 right-4 flex space-x-2 z-50 transition-all opacity-100 md:opacity-0 md:group-hover/card:opacity-100">
+                        <button onClick={() => handleFullPreview('minimal2')} className="bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold border border-gray-100 hover:bg-gray-50 transition-colors">Full Preview</button>
+                        <button onClick={() => handleTemplateStep('minimal2')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold hover:bg-emerald-700 transition-colors">Launch Website 🚀</button>
+                      </div>
                     </div>
                     <div className="relative group/card text-left">
                        <MinimalTemplateThree onSelect={() => handleTemplateStep('minimal3')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal3' } as SchoolData} />
-                      <button onClick={() => handleFullPreview('minimal3')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                      <div className="absolute top-4 right-4 flex space-x-2 z-50 transition-all opacity-100 md:opacity-0 md:group-hover/card:opacity-100">
+                        <button onClick={() => handleFullPreview('minimal3')} className="bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold border border-gray-100 hover:bg-gray-50 transition-colors">Full Preview</button>
+                        <button onClick={() => handleTemplateStep('minimal3')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold hover:bg-emerald-700 transition-colors">Launch Website 🚀</button>
+                      </div>
                     </div>
                     <div className="relative group/card text-left">
                        <MinimalTemplateRP onSelect={() => handleTemplateStep('minimal4')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'minimal4' } as SchoolData} />
-                      <button onClick={() => handleFullPreview('minimal4')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                      <div className="absolute top-4 right-4 flex space-x-2 z-50 transition-all opacity-100 md:opacity-0 md:group-hover/card:opacity-100">
+                        <button onClick={() => handleFullPreview('minimal4')} className="bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold border border-gray-100 hover:bg-gray-50 transition-colors">Full Preview</button>
+                        <button onClick={() => handleTemplateStep('minimal4')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold hover:bg-emerald-700 transition-colors">Launch Website 🚀</button>
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="relative group/card text-left">
                       <TemplateOne onSelect={() => handleTemplateStep('template1')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template1' } as SchoolData} />
-                      <button onClick={() => handleFullPreview('template1')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                      <div className="absolute top-4 right-4 flex space-x-2 z-50 transition-all opacity-100 md:opacity-0 md:group-hover/card:opacity-100">
+                        <button onClick={() => handleFullPreview('template1')} className="bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold border border-gray-100 hover:bg-gray-50 transition-colors">Full Preview</button>
+                        <button onClick={() => handleTemplateStep('template1')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold hover:bg-emerald-700 transition-colors">Launch Website 🚀</button>
+                      </div>
                     </div>
                     <div className="relative group/card text-left">
                       <TemplateTwo onSelect={() => handleTemplateStep('template2')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template2' } as SchoolData} />
-                      <button onClick={() => handleFullPreview('template2')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                      <div className="absolute top-4 right-4 flex space-x-2 z-50 transition-all opacity-100 md:opacity-0 md:group-hover/card:opacity-100">
+                        <button onClick={() => handleFullPreview('template2')} className="bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold border border-gray-100 hover:bg-gray-50 transition-colors">Full Preview</button>
+                        <button onClick={() => handleTemplateStep('template2')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold hover:bg-emerald-700 transition-colors">Launch Website 🚀</button>
+                      </div>
                     </div>
                     <div className="relative group/card text-left">
                       <TemplateThree onSelect={() => handleTemplateStep('template3')} data={{ email: registrationData.schoolEmail, name: registrationData.schoolName, tagline: detailsData.tagline, description: detailsData.description, logo: detailsData.logoUrl, image: detailsData.imageUrl, template: 'template3' } as SchoolData} />
-                      <button onClick={() => handleFullPreview('template3')} className="absolute top-4 right-4 bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all z-50 text-[10px] font-bold border border-gray-100">Full Preview</button>
+                      <div className="absolute top-4 right-4 flex space-x-2 z-50 transition-all opacity-100 md:opacity-0 md:group-hover/card:opacity-100">
+                        <button onClick={() => handleFullPreview('template3')} className="bg-white text-slate-800 px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold border border-gray-100 hover:bg-gray-50 transition-colors">Full Preview</button>
+                        <button onClick={() => handleTemplateStep('template3')} className="bg-emerald-600 text-white px-3 py-1.5 rounded-full shadow-xl text-[10px] font-bold hover:bg-emerald-700 transition-colors">Launch Website 🚀</button>
+                      </div>
                     </div>
                   </div>
                 )}

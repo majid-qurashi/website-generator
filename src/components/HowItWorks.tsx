@@ -65,8 +65,8 @@ export default function HowItWorks() {
           <p className="text-lg text-gray-600 mb-6">
             Ready to transform your school's online presence?
           </p>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-10 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg text-lg">
-            Get Started for Free
+          <button className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-10 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg text-lg">
+            Site Creation Demo.
           </button>
         </div>
       </div>
