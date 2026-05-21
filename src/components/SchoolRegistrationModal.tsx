@@ -46,14 +46,6 @@ export default function SchoolRegistrationModal({
   const [activeCategory, setActiveCategory] = useState<'fancy' | 'simple'>('simple');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Custom Domain Mapping States for Onboarding Success Step
-  const [customDomainInput, setCustomDomainInput] = useState('');
-  const [isSavingDomain, setIsSavingDomain] = useState(false);
-  const [customDomainMessage, setCustomDomainMessage] = useState('');
-  const [mappedSchool, setMappedSchool] = useState<any>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [dnsStatusMessage, setDnsStatusMessage] = useState('');
-
   useEffect(() => {
     if (isOpen) {
       setStep('registration');
@@ -73,12 +65,6 @@ export default function SchoolRegistrationModal({
       });
       setErrors({});
       setLoading(false);
-      setCustomDomainInput('');
-      setIsSavingDomain(false);
-      setCustomDomainMessage('');
-      setMappedSchool(null);
-      setIsVerifying(false);
-      setDnsStatusMessage('');
     }
   }, [isOpen]);
 
@@ -336,45 +322,6 @@ export default function SchoolRegistrationModal({
     if (launchSuccess) {
       setSelectedTemplate(templateId);
       setStep('success');
-      
-      // Fetch school details to enable immediate custom domain mapping!
-      const loadSchoolDetails = async () => {
-        try {
-          const res = await fetch('http://localhost:5000/school-settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: registrationData.schoolEmail })
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.school) {
-              setMappedSchool(data.school);
-              setCustomDomainInput(`${data.school.subdomain || 'school'}.com`);
-              return;
-            }
-          }
-          
-          // Fallback to Supabase if local server fails
-          const { data: school } = await supabase
-            .from('schools')
-            .select('*')
-            .eq('email', registrationData.schoolEmail)
-            .single();
-          if (school) {
-            setMappedSchool(school);
-            setCustomDomainInput(`${school.subdomain || 'school'}.com`);
-          } else {
-            const cleanName = registrationData.schoolName.toLowerCase().trim().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-            setCustomDomainInput(`${cleanName || 'school'}.com`);
-          }
-        } catch (e) {
-          console.error("Failed to load school details on success screen:", e);
-          const cleanName = registrationData.schoolName.toLowerCase().trim().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-          setCustomDomainInput(`${cleanName || 'school'}.com`);
-        }
-      };
-      
-      loadSchoolDetails();
     }
     setLoading(false);
   };
@@ -386,8 +333,7 @@ export default function SchoolRegistrationModal({
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity" onClick={onClose}></div>
 
       <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-[95%] shadow-2xl transition-all duration-500 ${
-        step === 'template' ? 'sm:max-w-6xl' : 
-        step === 'success' ? 'sm:max-w-xl' : 'sm:max-w-md'
+        step === 'template' ? 'sm:max-w-6xl' : 'sm:max-w-md'
       }`}>
         <div className="bg-white dark:bg-gray-900 rounded-[2rem] overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col max-h-[90vh]">
 
@@ -561,295 +507,27 @@ export default function SchoolRegistrationModal({
             )}
 
             {step === 'success' && (
-              <div className="text-center py-6 px-2 animate-in zoom-in duration-500 max-w-lg mx-auto space-y-6">
-                <div>
-                  <div className="text-6xl mb-4">✨</div>
-                  <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 italic">Congratulations!</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                    Your school registration is complete and your brand new website 
-                    <strong className="text-slate-800 dark:text-slate-100 font-bold block mt-1"> {registrationData.schoolName} </strong> is ready for the world.
-                  </p>
+              <div className="text-center py-10 animate-in zoom-in duration-500 max-w-md mx-auto">
+                <div className="text-8xl mb-6">✨</div>
+                <h3 className="text-3xl font-black text-slate-800 dark:text-white mb-4 italic">Congratulations!</h3>
+                <p className="text-slate-500 mb-8 max-w-sm mx-auto">
+                  Your school registration is complete and your brand new website 
+                  <strong className="block mt-1 font-bold text-slate-850 dark:text-slate-100"> {registrationData.schoolName} </strong> is ready for the world.
+                </p>
+                <Link 
+                  href={`/school/${registrationData.schoolEmail}`}
+                  target="_blank"
+                  className="inline-block w-full sm:w-auto bg-indigo-600 text-white font-black px-8 sm:px-12 py-3.5 sm:py-5 rounded-2xl shadow-2xl shadow-indigo-600/30 hover:scale-105 active:scale-95 transition-all text-lg sm:text-2xl cursor-pointer"
+                >
+                  🚀 Launch Website
+                </Link>
+                <div className="mt-8 text-sm text-slate-400">
+                   A confirmation email has been sent to {registrationData.schoolEmail}
                 </div>
-
-                {/* Main Action Links Card */}
-                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 space-y-4 shadow-sm text-left">
-                  <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-wider block">1. Site Preview URLs</span>
-                  
-                  <div className="space-y-2.5">
-                    {/* Instant Subdomain URL */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/60 p-3 rounded-2xl gap-2">
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Instant Subdomain</span>
-                        <a 
-                          href={`http://${mappedSchool?.subdomain || 'school'}.localhost:3000`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline block truncate max-w-xs"
-                        >
-                          {mappedSchool?.subdomain || 'school'}.localhost:3000
-                        </a>
-                      </div>
-                      <a 
-                        href={`http://${mappedSchool?.subdomain || 'school'}.localhost:3000`} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="bg-indigo-50 dark:bg-indigo-950/45 text-indigo-600 dark:text-indigo-450 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 font-black text-[11px] px-3.5 py-2 rounded-xl transition-all text-center flex-shrink-0"
-                      >
-                        🚀 Launch Preview
-                      </a>
-                    </div>
-
-                    {/* Standard Email Dashboard URL */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/60 p-3 rounded-2xl gap-2">
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Builder Panel Route</span>
-                        <a 
-                          href={`/school/${registrationData.schoolEmail}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline block truncate max-w-xs"
-                        >
-                          /school/{registrationData.schoolEmail}
-                        </a>
-                      </div>
-                      <Link 
-                        href={`/school/${registrationData.schoolEmail}`} 
-                        target="_blank"
-                        className="bg-emerald-50 dark:bg-emerald-950/45 text-emerald-600 dark:text-emerald-450 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 font-black text-[11px] px-3.5 py-2 rounded-xl transition-all text-center flex-shrink-0"
-                      >
-                        🎨 Customize Design
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Custom Domain and Hosting Mapping Section */}
-                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 shadow-sm text-left space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 tracking-wider block">2. Connect Custom Domain</span>
-                    {mappedSchool?.custom_domain ? (
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                        mappedSchool.dns_status === 'connected' 
-                          ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' 
-                          : 'bg-amber-500/10 border border-amber-500/20 text-amber-500'
-                      }`}>
-                        {mappedSchool.dns_status || 'Pending'}
-                      </span>
-                    ) : (
-                      <span className="text-[9px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-2 py-0.5 rounded-full uppercase tracking-wider">Unmapped</span>
-                    )}
-                  </div>
-
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
-                    Map your new school website to a professional TLD. Click a suggestion preset below or enter a custom one:
-                  </p>
-
-                  <div className="space-y-3">
-                    {/* TLD Quick Presets based on school name slug */}
-                    <div className="flex items-center space-x-2 pt-0.5">
-                      <span className="text-[10px] text-slate-400 font-bold tracking-wide uppercase">Quick Suggestions:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {['.com', '.in', '.edu.in'].map((tld) => {
-                          const sug = `${mappedSchool?.subdomain || registrationData.schoolName.toLowerCase().trim().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || 'school'}${tld}`;
-                          return (
-                            <button
-                              key={tld}
-                              type="button"
-                              onClick={() => setCustomDomainInput(sug)}
-                              className={`text-[10px] px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
-                                customDomainInput === sug
-                                  ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-500/40 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-450 hover:text-gray-850 dark:hover:text-white'
-                              }`}
-                            >
-                              {tld}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={customDomainInput}
-                        onChange={(e) => setCustomDomainInput(e.target.value.toLowerCase().replace(/[^a-z0-9\.\-]/g, ''))}
-                        placeholder="e.g. schoolname.com"
-                        className="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl py-2 px-3 text-xs text-gray-800 dark:text-white focus:border-indigo-500 outline-none"
-                      />
-                      <button
-                        onClick={async () => {
-                          const email = registrationData.schoolEmail;
-                          if (!email) return;
-                          setIsSavingDomain(true);
-                          setCustomDomainMessage('');
-                          try {
-                            const res = await fetch('http://localhost:5000/update-domain-settings', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ email, customDomain: customDomainInput }),
-                            });
-                            const data = await res.json();
-                            if (res.ok) {
-                              setMappedSchool(data.school);
-                              setCustomDomainMessage(customDomainInput ? 'Custom domain linked successfully! ✓' : 'Custom domain removed.');
-                              setTimeout(() => setCustomDomainMessage(''), 4000);
-                            } else {
-                              setCustomDomainMessage(`Error: ${data.error || 'Failed to connect'}`);
-                            }
-                          } catch (err: any) {
-                            setCustomDomainMessage(`Network Error: ${err.message}`);
-                          } finally {
-                            setIsSavingDomain(false);
-                          }
-                        }}
-                        disabled={isSavingDomain || customDomainInput === (mappedSchool?.custom_domain || '')}
-                        className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 dark:disabled:bg-gray-850 disabled:text-gray-400 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all active:scale-[0.98] cursor-pointer flex-shrink-0"
-                      >
-                        {isSavingDomain ? 'Saving...' : mappedSchool?.custom_domain ? 'Update' : 'Map Domain'}
-                      </button>
-                    </div>
-
-                    {customDomainMessage && (
-                      <p className={`text-[10px] font-bold px-1 ${customDomainMessage.startsWith('Error') || customDomainMessage.startsWith('Network') ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {customDomainMessage}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* DNS copy instruction area inside onboarding success step */}
-                  {mappedSchool?.custom_domain && (
-                    <div className="mt-4 p-4 rounded-2xl bg-white dark:bg-gray-950 border border-gray-150 dark:border-gray-800 text-left space-y-3 animate-in slide-in-from-top-1 duration-200">
-                      <div className="space-y-1">
-                        <h4 className="text-xs font-bold text-gray-800 dark:text-white">Setup DNS at your registrar</h4>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-normal">
-                          Login to GoDaddy, Hostinger, or Namecheap and configure these records:
-                        </p>
-                      </div>
-
-                      <div className="space-y-2 text-[10px]">
-                        {/* A Record */}
-                        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-xl p-2.5 space-y-1">
-                          <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-                            <span>A Record</span>
-                            <span className="text-indigo-600 dark:text-indigo-400">Required</span>
-                          </div>
-                          <div className="flex justify-between items-center bg-white dark:bg-gray-950 p-2 rounded-lg font-mono text-[9px] border border-gray-100 dark:border-gray-850">
-                            <span className="text-gray-800 dark:text-slate-200">Host: @  |  Value: 76.76.21.21</span>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText('76.76.21.21');
-                                alert('A Record Value copied! ✓');
-                              }}
-                              className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
-                              title="Copy Value"
-                            >
-                              📋
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* CNAME Record */}
-                        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-xl p-2.5 space-y-1">
-                          <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-                            <span>CNAME Record</span>
-                            <span className="text-indigo-600 dark:text-indigo-400">Required</span>
-                          </div>
-                          <div className="flex justify-between items-center bg-white dark:bg-gray-950 p-2 rounded-lg font-mono text-[9px] border border-gray-100 dark:border-gray-850">
-                            <span className="text-gray-800 dark:text-slate-200">Host: www  |  Value: cname.myschoolbuilder.com</span>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText('cname.myschoolbuilder.com');
-                                alert('CNAME Record Value copied! ✓');
-                              }}
-                              className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
-                              title="Copy Value"
-                            >
-                              📋
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* TXT Verification */}
-                        <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-xl p-2.5 space-y-1">
-                          <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-                            <span>TXT Verification</span>
-                            <span className="text-indigo-600 dark:text-indigo-400">SSL Shield</span>
-                          </div>
-                          <div className="flex justify-between items-center bg-white dark:bg-gray-950 p-2 rounded-lg font-mono text-[9px] border border-gray-100 dark:border-gray-850">
-                            <span className="text-gray-800 dark:text-slate-200">Host: _school-auth  |  Value: school-auth-hash-{mappedSchool?.id || '101'}</span>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(`school-auth-hash-${mappedSchool?.id || '101'}`);
-                                alert('TXT Record Value copied! ✓');
-                              }}
-                              className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer"
-                              title="Copy Value"
-                            >
-                              📋
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Verify DNS Button */}
-                      <div className="pt-2">
-                        <button
-                          onClick={async () => {
-                            const email = registrationData.schoolEmail;
-                            if (!email) return;
-                            setIsVerifying(true);
-                            setDnsStatusMessage('');
-                            try {
-                              await new Promise((r) => setTimeout(r, 1500));
-                              const res = await fetch('http://localhost:5000/verify-dns-settings', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email }),
-                              });
-                              const data = await res.json();
-                              if (res.ok) {
-                                setMappedSchool(data.school);
-                                setDnsStatusMessage('DNS connection verified! SSL certificate issued successfully. ✓');
-                              } else {
-                                setDnsStatusMessage(`Verification error: ${data.error || 'Failed'}`);
-                              }
-                            } catch (err: any) {
-                              setDnsStatusMessage(`Network error during DNS check: ${err.message}`);
-                            } finally {
-                              setIsVerifying(false);
-                            }
-                          }}
-                          disabled={isVerifying || mappedSchool?.dns_status === 'connected'}
-                          className="w-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 disabled:bg-emerald-50 dark:disabled:bg-emerald-950/20 disabled:text-emerald-600 disabled:border-emerald-500/20 text-indigo-400 font-bold py-2.5 rounded-xl transition-all cursor-pointer text-xs flex items-center justify-center space-x-2 border border-indigo-500/25"
-                        >
-                          {isVerifying ? (
-                            <>
-                              <span className="w-3.5 h-3.5 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" />
-                              <span>Querying DNS Servers...</span>
-                            </>
-                          ) : mappedSchool?.dns_status === 'connected' ? (
-                            <span>✓ Connected & HTTPS Enabled</span>
-                          ) : (
-                            <span>🔍 Verify DNS & Activate SSL</span>
-                          )}
-                        </button>
-                        {dnsStatusMessage && (
-                          <p className={`text-[10px] font-bold text-center mt-2 ${
-                            dnsStatusMessage.includes('verified') ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'
-                          }`}>
-                            {dnsStatusMessage}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-center pt-2">
+                <div className="flex justify-center pt-8">
                   <button 
                     onClick={onClose}
-                    className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black px-10 py-3.5 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all text-base"
+                    className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black px-10 py-3.5 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all text-base cursor-pointer"
                   >
                     Done & Close
                   </button>
