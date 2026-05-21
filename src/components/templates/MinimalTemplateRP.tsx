@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
 import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
 import { ThemeConfig } from '@/types/theme';
+import InteractiveCampus from '@/components/templates/InteractiveCampus';
+import VirtualReception from '@/components/templates/VirtualReception';
 
 interface TemplateProps {
   onSelect?: () => void;
@@ -169,6 +171,11 @@ export default function MinimalTemplateRP({ onSelect, data = defaultData, isFull
            {school.name}
          </h4>
        </div>
+       <div className="max-w-4xl mx-auto flex flex-col items-center space-y-4 mb-12 text-center">
+          <p className="text-theme-text font-semibold text-xs md:text-sm tracking-wide">{school.address || '12 Main Boulevard, Sector C, Srinagar, J&K'}</p>
+          <p className="text-theme-primary font-bold text-xs md:text-sm">{school.contact_number || '+91 98765 43210'}</p>
+          <p className="text-theme-secondary font-black text-[10px] uppercase tracking-widest">{school.school_type || 'High School'}</p>
+       </div>
        
        <p className="font-bold text-xs md:text-base tracking-[0.2em] uppercase max-w-lg mx-auto opacity-80 leading-relaxed text-theme-textMuted">
          Developed with excellence by <br className="md:hidden"/> <a href="https://qurashi.vercel.app" target="_blank" className="text-theme-primary hover:text-white transition-colors underline underline-offset-8 mt-4 inline-block font-black">Majid Qurashi</a>
@@ -190,12 +197,12 @@ export default function MinimalTemplateRP({ onSelect, data = defaultData, isFull
       {/* Top Banner (Contact) */}
       <div className={`hidden md:flex bg-theme-cardBg border-b border-theme-border py-1.5 px-8 justify-between text-[10px] font-bold uppercase tracking-widest text-theme-textMuted`}>
          <div className="flex space-x-6">
-            <span>📞 +91 123 456 7890</span>
-            <span>✉️ info@rpschool.edu.in</span>
+            <span>📞 {school.contact_number || '+91 98765 43210'}</span>
+            <span>✉️ {school.email || 'admin@rpschool.edu.in'}</span>
          </div>
          <div className="flex space-x-4">
             <span className="hover:text-theme-primary cursor-pointer">Login</span>
-            <span className="text-theme-secondary font-black">Online Registration</span>
+            <span className="text-theme-secondary font-black">{school.school_type || 'High School'}</span>
          </div>
       </div>
 
@@ -208,6 +215,8 @@ export default function MinimalTemplateRP({ onSelect, data = defaultData, isFull
           if (!isVisible(sectionId)) return null;
           switch (sectionId) {
             case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
+            case 'interactive-campus': return <InteractiveCampus key="interactive-campus" school={school} theme={theme} isFullPage={isFullPage} />;
+            case 'virtual-reception': return <VirtualReception key="virtual-reception" school={school} theme={theme} isFullPage={isFullPage} />;
             case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
             case 'footer': return <React.Fragment key="footer">{renderFooter()}</React.Fragment>;
             default: return null;

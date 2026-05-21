@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
 import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
 import { ThemeConfig } from '@/types/theme';
+import InteractiveCampus from '@/components/templates/InteractiveCampus';
+import VirtualReception from '@/components/templates/VirtualReception';
 
 interface TemplateProps {
   onSelect?: () => void;
@@ -151,7 +153,7 @@ export default function TemplateThree({ onSelect, data = defaultData, isFullPage
         <span className="uppercase font-sans font-black tracking-[0.5em] text-theme-primary text-[10px] mb-6 block">Legacy of Excellence</span>
         <h2 
           style={{ fontFamily: theme.typography.headingFont, fontWeight: theme.typography.fontWeight }}
-          className={`text-theme-text font-themeHeading font-black mb-8 leading-[1.1] ${isFullPage ? 'text-4xl md:text-7xl lg:text-8xl' : 'text-2xl'}`}
+          className={`text-theme-text font-themeHeading font-black mb-8 leading-[1.1] ${isFullPage ? 'text-3xl sm:text-4xl md:text-7xl lg:text-8xl' : 'text-2xl'}`}
         >
           {school.tagline || defaultData.tagline}
         </h2>
@@ -291,8 +293,10 @@ export default function TemplateThree({ onSelect, data = defaultData, isFullPage
             
             {/* Signature & Seal */}
             <div className="flex flex-col items-start lg:items-center mt-6">
-              <div className="font-serif text-3xl text-theme-primary italic tracking-wider">Dr. Sarah Jenkins</div>
-              <div className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-theme-textMuted mt-2">Principal of the College</div>
+              <div className="font-serif text-3xl text-theme-primary italic tracking-wider">{school.principal_name || 'Dr. Sarah Jenkins'}</div>
+              <div className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-theme-textMuted mt-2">
+                Principal{school.school_type ? `, ${school.school_type}` : ' of the College'}
+              </div>
             </div>
           </div>
         </div>
@@ -336,10 +340,15 @@ export default function TemplateThree({ onSelect, data = defaultData, isFullPage
       <div className="w-24 h-1 bg-theme-primary mb-12"></div>
       <p 
         style={{ fontFamily: theme.typography.bodyFont }}
-        className="text-theme-text font-themeBody italic text-base md:text-xl text-center max-w-sm mb-16"
+        className="text-theme-text font-themeBody italic text-base md:text-xl text-center max-w-sm mb-12"
       >
-        Institutional Excellence since 1924. Building the elite leaders of tomorrow.
+        {school.tagline || defaultData.tagline || 'Institutional Excellence since 1924. Building the elite leaders of tomorrow.'}
       </p>
+      <div className="flex flex-col items-center gap-4 text-center max-w-md mb-12">
+        <div className="text-theme-text text-sm font-semibold tracking-wider">{school.address || '12 Main Boulevard, Sector C, Srinagar, J&K'}</div>
+        <div className="text-theme-primary text-sm font-bold tracking-widest">{school.contact_number || '+91 98765 43210'}</div>
+        <div className="text-theme-secondary text-[10px] font-black uppercase tracking-[0.3em]">{school.school_type || 'High School'}</div>
+      </div>
       <div className="flex flex-wrap justify-center gap-10 font-sans font-black text-[10px] tracking-[0.5em] mb-20 opacity-50">
         <span>POLICIES</span>
         <span>STAFF</span>
@@ -399,6 +408,8 @@ export default function TemplateThree({ onSelect, data = defaultData, isFullPage
             switch (sectionId) {
               case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
               case 'stats': return <React.Fragment key="stats">{renderStats()}</React.Fragment>;
+              case 'interactive-campus': return <InteractiveCampus key="interactive-campus" school={school} theme={theme} isFullPage={isFullPage} />;
+              case 'virtual-reception': return <VirtualReception key="virtual-reception" school={school} theme={theme} isFullPage={isFullPage} />;
               case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
               case 'principal': return <React.Fragment key="principal">{renderPrincipal()}</React.Fragment>;
               case 'banner': return <React.Fragment key="banner">{renderBanner()}</React.Fragment>;

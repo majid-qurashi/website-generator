@@ -44,8 +44,8 @@ export const PRESETS: Record<string, PresetTheme> = {
       borderRadius: 'rounded',
       shadowIntensity: 'medium',
       stickyNavbar: true,
-      sectionsOrder: ['hero', 'stats', 'about', 'principal', 'banner', 'footer'],
-      sectionsVisibility: { hero: true, stats: true, about: true, principal: true, banner: true, footer: true },
+      sectionsOrder: ['virtual-reception', 'hero', 'stats', 'interactive-campus', 'about', 'principal', 'banner', 'footer'],
+      sectionsVisibility: { 'virtual-reception': true, hero: true, stats: true, 'interactive-campus': true, about: true, principal: true, banner: true, footer: true },
     },
     branding: {
       logoSize: '40px',
@@ -98,8 +98,8 @@ export const PRESETS: Record<string, PresetTheme> = {
       borderRadius: 'extra-rounded',
       shadowIntensity: 'light',
       stickyNavbar: true,
-      sectionsOrder: ['hero', 'stats', 'about', 'principal', 'banner', 'footer'],
-      sectionsVisibility: { hero: true, stats: true, about: true, principal: true, banner: true, footer: true },
+      sectionsOrder: ['virtual-reception', 'hero', 'stats', 'interactive-campus', 'about', 'principal', 'banner', 'footer'],
+      sectionsVisibility: { 'virtual-reception': true, hero: true, stats: true, 'interactive-campus': true, about: true, principal: true, banner: true, footer: true },
     },
     branding: {
       logoSize: '44px',
@@ -152,8 +152,8 @@ export const PRESETS: Record<string, PresetTheme> = {
       borderRadius: 'none',
       shadowIntensity: 'none',
       stickyNavbar: false,
-      sectionsOrder: ['hero', 'stats', 'about', 'principal', 'banner', 'footer'],
-      sectionsVisibility: { hero: true, stats: true, about: true, principal: true, banner: true, footer: true },
+      sectionsOrder: ['virtual-reception', 'hero', 'stats', 'interactive-campus', 'about', 'principal', 'banner', 'footer'],
+      sectionsVisibility: { 'virtual-reception': true, hero: true, stats: true, 'interactive-campus': true, about: true, principal: true, banner: true, footer: true },
     },
     branding: {
       logoSize: '36px',
@@ -206,8 +206,8 @@ export const PRESETS: Record<string, PresetTheme> = {
       borderRadius: 'extra-rounded',
       shadowIntensity: 'medium',
       stickyNavbar: true,
-      sectionsOrder: ['hero', 'stats', 'about', 'principal', 'banner', 'footer'],
-      sectionsVisibility: { hero: true, stats: true, about: true, principal: true, banner: true, footer: true },
+      sectionsOrder: ['virtual-reception', 'hero', 'stats', 'interactive-campus', 'about', 'principal', 'banner', 'footer'],
+      sectionsVisibility: { 'virtual-reception': true, hero: true, stats: true, 'interactive-campus': true, about: true, principal: true, banner: true, footer: true },
     },
     branding: {
       logoSize: '40px',
@@ -260,8 +260,8 @@ export const PRESETS: Record<string, PresetTheme> = {
       borderRadius: 'extra-rounded',
       shadowIntensity: 'high',
       stickyNavbar: true,
-      sectionsOrder: ['hero', 'stats', 'about', 'principal', 'banner', 'footer'],
-      sectionsVisibility: { hero: true, stats: true, about: true, principal: true, banner: true, footer: true },
+      sectionsOrder: ['virtual-reception', 'hero', 'stats', 'interactive-campus', 'about', 'principal', 'banner', 'footer'],
+      sectionsVisibility: { 'virtual-reception': true, hero: true, stats: true, 'interactive-campus': true, about: true, principal: true, banner: true, footer: true },
     },
     branding: {
       logoSize: '40px',
@@ -314,8 +314,8 @@ export const PRESETS: Record<string, PresetTheme> = {
       borderRadius: 'rounded',
       shadowIntensity: 'high',
       stickyNavbar: true,
-      sectionsOrder: ['hero', 'stats', 'about', 'principal', 'banner', 'footer'],
-      sectionsVisibility: { hero: true, stats: true, about: true, principal: true, banner: true, footer: true },
+      sectionsOrder: ['virtual-reception', 'hero', 'stats', 'interactive-campus', 'about', 'principal', 'banner', 'footer'],
+      sectionsVisibility: { 'virtual-reception': true, hero: true, stats: true, 'interactive-campus': true, about: true, principal: true, banner: true, footer: true },
     },
     branding: {
       logoSize: '40px',
@@ -339,6 +339,66 @@ const DEFAULT_THEME: ThemeConfig = {
   layout: PRESETS['modern-blue'].layout,
   branding: PRESETS['modern-blue'].branding,
   components: PRESETS['modern-blue'].components,
+};
+
+const sanitizeThemeConfig = (parsed: any, presetDefaults: PresetTheme): ThemeConfig => {
+  const layout = {
+    ...presetDefaults.layout,
+    ...parsed.layout,
+    sectionsOrder: [...(parsed.layout?.sectionsOrder || presetDefaults.layout.sectionsOrder)],
+    sectionsVisibility: {
+      ...presetDefaults.layout.sectionsVisibility,
+      ...(parsed.layout?.sectionsVisibility || {}),
+    }
+  };
+
+  // Backfill missing sections for backwards compatibility
+  const requiredSections = ['virtual-reception', 'interactive-campus', 'principal'];
+  requiredSections.forEach((section) => {
+    if (!layout.sectionsOrder.includes(section)) {
+      if (section === 'virtual-reception') {
+        layout.sectionsOrder.unshift('virtual-reception');
+      } else if (section === 'interactive-campus') {
+        const heroIndex = layout.sectionsOrder.indexOf('hero');
+        if (heroIndex !== -1) {
+          layout.sectionsOrder.splice(heroIndex + 2, 0, 'interactive-campus');
+        } else {
+          layout.sectionsOrder.splice(layout.sectionsOrder.length - 1, 0, 'interactive-campus');
+        }
+      } else if (section === 'principal') {
+        const aboutIndex = layout.sectionsOrder.indexOf('about');
+        if (aboutIndex !== -1) {
+          layout.sectionsOrder.splice(aboutIndex + 1, 0, 'principal');
+        } else {
+          layout.sectionsOrder.splice(layout.sectionsOrder.length - 1, 0, 'principal');
+        }
+      }
+    }
+    if (layout.sectionsVisibility[section] === undefined) {
+      layout.sectionsVisibility[section] = true;
+    }
+  });
+
+  return {
+    preset: parsed.preset || presetDefaults.id,
+    colors: {
+      ...presetDefaults.colors,
+      ...parsed.colors,
+    },
+    typography: {
+      ...presetDefaults.typography,
+      ...parsed.typography,
+    },
+    layout,
+    branding: {
+      ...presetDefaults.branding,
+      ...parsed.branding,
+    },
+    components: {
+      ...presetDefaults.components,
+      ...parsed.components,
+    }
+  };
 };
 
 interface ContrastRating {
@@ -387,6 +447,7 @@ const loadGoogleFont = (fontFamily: string) => {
 
 // Mathematically Correct WCAG 2.1 Contrast Ratio Calculator
 const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
+  if (!hex || typeof hex !== 'string') return null;
   const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
   const fullHex = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
@@ -469,7 +530,10 @@ export function SchoolThemeProvider({
           : initialThemeData;
         
         if (parsed.colors && parsed.typography) {
-          setThemeState(parsed);
+          const presetId = parsed.preset || 'modern-blue';
+          const presetDefaults = PRESETS[presetId] || PRESETS['modern-blue'];
+          const mergedTheme = sanitizeThemeConfig(parsed, presetDefaults);
+          setThemeState(mergedTheme);
         }
       } catch (err) {
         console.error('Failed to parse initial theme settings:', err);
@@ -481,7 +545,10 @@ export function SchoolThemeProvider({
         try {
           const parsed = JSON.parse(savedDraft);
           if (parsed.colors && parsed.typography) {
-            setThemeState(parsed);
+            const presetId = parsed.preset || 'modern-blue';
+            const presetDefaults = PRESETS[presetId] || PRESETS['modern-blue'];
+            const mergedTheme = sanitizeThemeConfig(parsed, presetDefaults);
+            setThemeState(mergedTheme);
           }
         } catch (e) {}
       }
@@ -518,15 +585,15 @@ export function SchoolThemeProvider({
 
         if (dbError) throw dbError;
 
-        // 2. Silent Sync to local Express backend (if active)
+        // 2. Sync to Next.js serverless API backend
         try {
-          await fetch('http://localhost:5000/save-theme-settings', {
+          await fetch('/api/save-theme-settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: schoolEmail, themeSettings: theme }),
           });
         } catch (e) {
-          // Ignore offline local server logs
+          // Ignore offline logs
         }
 
         setAutoSaveStatus('saved');
@@ -639,16 +706,16 @@ export function SchoolThemeProvider({
 
       if (dbError) throw dbError;
 
-      // 2. Local Backend PostgreSQL Syncing (if server is active)
+      // 2. Next.js Serverless API Backend Syncing
       try {
-        const res = await fetch('http://localhost:5000/save-theme-settings', {
+        const res = await fetch('/api/save-theme-settings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: schoolEmail, themeSettings: theme }),
         });
-        if (!res.ok) console.warn('Local Postgres backend not responding, synched to Supabase only.');
+        if (!res.ok) console.warn('Serverless database backend not responding, synced to Supabase only.');
       } catch (e) {
-        console.log('Postgres server offline, saved successfully to Supabase cloud.');
+        console.log('Serverless API offline, saved successfully to Supabase cloud.');
       }
 
       setDirty(false);
@@ -718,8 +785,8 @@ function ThemeStyles({ theme }: { theme: ThemeConfig }) {
   else if (layout.shadowIntensity === 'high') shadowVal = '0 25px 50px -12px rgba(0,0,0,0.25)';
 
   // Helper to convert hex to space-separated RGB numbers
-  const hexToRgbChannels = (hex: string, defaultVal: string) => {
-    const rgb = hexToRgb(hex);
+  const hexToRgbChannels = (hex: string | undefined | null, defaultVal: string) => {
+    const rgb = hexToRgb(hex as any);
     return rgb ? `${rgb.r} ${rgb.g} ${rgb.b}` : defaultVal;
   };
 

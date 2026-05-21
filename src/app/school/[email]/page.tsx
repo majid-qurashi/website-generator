@@ -10,6 +10,8 @@ import TemplateThree from '@/components/templates/TemplateThree';
 import { SchoolThemeProvider } from '@/components/SchoolThemeProvider';
 import { notFound } from 'next/navigation';
 
+import { query } from '@/lib/db';
+
 interface PageProps {
   params: Promise<{ email: string }>;
 }
@@ -20,15 +22,31 @@ export default async function SchoolWebsitePage({ params }: PageProps) {
   // Decoding email in case it's URL encoded (e.g. %40 for @)
   const decodedEmail = decodeURIComponent(email);
 
-  // Fetch school data from Supabase
-  const { data: school, error } = await supabase
-    .from('schools')
-    .select('*')
-    .eq('email', decodedEmail)
-    .single();
+  let school = null;
+  
+  try {
+    const res = await query('SELECT * FROM schools WHERE email = $1', [decodedEmail]);
+    if (res && res.rows && res.rows.length > 0) {
+      school = res.rows[0];
+    }
+  } catch (err) {
+    console.error('Error fetching school via direct query:', err);
+  }
 
-  if (error || !school) {
-    console.error('Error fetching school:', error);
+  if (!school) {
+    const { data, error } = await supabase
+      .from('schools')
+      .select('*')
+      .eq('email', decodedEmail)
+      .single();
+      
+    if (!error && data) {
+      school = data;
+    }
+  }
+
+  if (!school) {
+    console.error('Error: School profile not found.');
     return notFound();
   }
 

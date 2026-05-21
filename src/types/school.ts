@@ -11,5 +11,10 @@ export interface SchoolData {
   template: string | null;
   password?: string;
   theme_settings?: ThemeConfig | null;
+  school_type?: string | null;
+  principal_name?: string | null;
+  contact_number?: string | null;
+  address?: string | null;
+  custom_domain?: string | null;
 }
 

@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
 import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
 import { ThemeConfig } from '@/types/theme';
+import InteractiveCampus from '@/components/templates/InteractiveCampus';
+import VirtualReception from '@/components/templates/VirtualReception';
 
 interface TemplateProps {
   onSelect?: () => void;
@@ -173,7 +175,7 @@ export default function TemplateOne({ onSelect, data = defaultData, isFullPage =
             </span>
             <h1 
               style={{ fontFamily: theme.typography.headingFont, fontWeight: theme.typography.fontWeight }}
-              className={`text-white font-black leading-[1.1] mb-6 md:mb-8 tracking-tight transition-all ${isFullPage ? 'text-4xl md:text-6xl lg:text-7.5xl' : 'text-xl'}`}
+              className={`text-white font-black leading-[1.1] mb-6 md:mb-8 tracking-tight transition-all ${isFullPage ? 'text-3xl sm:text-4xl md:text-6xl lg:text-7.5xl' : 'text-xl'}`}
             >
               {school.tagline || "Future Ready Education"}
             </h1>
@@ -289,8 +291,8 @@ export default function TemplateOne({ onSelect, data = defaultData, isFullPage =
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 text-white">
-                  <div className="font-themeHeading text-xl font-bold tracking-tight">Dr. Sarah Jenkins</div>
-                  <div className="text-white/80 text-xs font-semibold uppercase tracking-wider mt-1">Ph.D. in Educational Leadership</div>
+                  <div className="font-themeHeading text-xl font-bold tracking-tight">{school.principal_name || 'Dr. Sarah Jenkins'}</div>
+                  <div className="text-white/80 text-xs font-semibold uppercase tracking-wider mt-1">{school.school_type ? `Principal, ${school.school_type}` : 'Ph.D. in Educational Leadership'}</div>
                 </div>
               </div>
             </div>
@@ -317,7 +319,7 @@ export default function TemplateOne({ onSelect, data = defaultData, isFullPage =
                 style={{ fontFamily: theme.typography.bodyFont }}
                 className="text-base md:text-lg text-theme-textMuted leading-relaxed mb-6 font-medium italic relative z-10"
               >
-                "At Qurashi International School, we are committed to building a vibrant learning community where intellectual curiosity is sparked, and students are empowered to make a meaningful difference in the world. Our holistic approach ensures that each child is supported to achieve academic excellence and personal growth."
+                "At {school.name || 'our school'}, we are committed to building a vibrant learning community where intellectual curiosity is sparked, and students are empowered to make a meaningful difference in the world. Our holistic approach ensures that each child is supported to achieve academic excellence and personal growth."
               </p>
             </div>
             
@@ -327,7 +329,7 @@ export default function TemplateOne({ onSelect, data = defaultData, isFullPage =
             
             {/* Signature & Credentials */}
             <div className="flex flex-col items-start lg:items-center mt-4">
-              <div className="font-serif text-2xl text-theme-primary italic tracking-wide">Dr. Sarah Jenkins</div>
+              <div className="font-serif text-2xl text-theme-primary italic tracking-wide">{school.principal_name || 'Dr. Sarah Jenkins'}</div>
               <div className="text-xs md:text-sm font-bold uppercase tracking-widest text-theme-textMuted mt-1">Principal & Executive Director</div>
             </div>
           </div>
@@ -366,16 +368,22 @@ export default function TemplateOne({ onSelect, data = defaultData, isFullPage =
             <div className="font-themeHeading font-black tracking-tighter text-white text-3xl">{school.name || defaultData.name}</div>
             <p className="text-slate-400 font-medium md:max-w-xs">{school.tagline || defaultData.tagline}</p>
          </div>
-         <div className="grid grid-cols-2 gap-12 text-sm font-bold">
+         <div className="grid grid-cols-3 gap-8 md:gap-12 text-sm font-bold">
             <div className="space-y-3">
-               <div className="text-slate-550 uppercase tracking-widest text-[10px]">Links</div>
+               <div className="text-slate-500 uppercase tracking-widest text-[10px]">Links</div>
                <div className="text-slate-400 hover:text-white transition-colors cursor-pointer">Home</div>
                <div className="text-slate-400 hover:text-white transition-colors cursor-pointer">Faculty</div>
             </div>
             <div className="space-y-3">
-               <div className="text-slate-555 uppercase tracking-widest text-[10px]">Resources</div>
+               <div className="text-slate-500 uppercase tracking-widest text-[10px]">Resources</div>
                <div className="text-slate-400 hover:text-white transition-colors cursor-pointer">Support</div>
                <div className="text-slate-400 hover:text-white transition-colors cursor-pointer">Terms</div>
+            </div>
+            <div className="space-y-3 col-span-3 md:col-span-1">
+               <div className="text-slate-500 uppercase tracking-widest text-[10px]">Contact Us</div>
+               <div className="text-slate-400 text-xs font-medium leading-relaxed">{school.address || '12 Main Boulevard, Sector C, Srinagar, J&K'}</div>
+               <div className="text-slate-400 text-xs font-medium">{school.contact_number || '+91 98765 43210'}</div>
+               <div className="text-theme-primary text-xs font-black uppercase tracking-widest">{school.school_type || 'High School'}</div>
             </div>
          </div>
       </div>
@@ -432,6 +440,8 @@ export default function TemplateOne({ onSelect, data = defaultData, isFullPage =
             switch (sectionId) {
               case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
               case 'stats': return <React.Fragment key="stats">{renderStats()}</React.Fragment>;
+              case 'interactive-campus': return <InteractiveCampus key="interactive-campus" school={school} theme={theme} isFullPage={isFullPage} />;
+              case 'virtual-reception': return <VirtualReception key="virtual-reception" school={school} theme={theme} isFullPage={isFullPage} />;
               case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
               case 'principal': return <React.Fragment key="principal">{renderPrincipal()}</React.Fragment>;
               case 'banner': return <React.Fragment key="banner">{renderBanner()}</React.Fragment>;

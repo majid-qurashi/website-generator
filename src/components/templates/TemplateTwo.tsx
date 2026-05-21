@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
 import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
 import { ThemeConfig } from '@/types/theme';
+import InteractiveCampus from '@/components/templates/InteractiveCampus';
+import VirtualReception from '@/components/templates/VirtualReception';
 
 interface TemplateProps {
   onSelect?: () => void;
@@ -143,7 +145,7 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
           
           <h1 
             style={{ fontFamily: theme.typography.headingFont, fontWeight: theme.typography.fontWeight }}
-            className={`text-theme-text font-black leading-[1] mb-8 md:mb-10 ${isFullPage ? 'text-4xl md:text-6xl lg:text-8xl max-w-5xl' : 'text-3xl'}`}
+            className={`text-theme-text font-black leading-[1] mb-8 md:mb-10 ${isFullPage ? 'text-3xl sm:text-4xl md:text-6xl lg:text-8xl max-w-5xl' : 'text-3xl'}`}
           >
             {(school.tagline || defaultData.tagline || '').split(' ').slice(0, -2).join(' ')} <br/>
             <span className="text-theme-primary underline decoration-theme-secondary decoration-8 underline-offset-[12px] italic">
@@ -291,7 +293,7 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
                 style={{ fontFamily: theme.typography.bodyFont }}
                 className="text-base md:text-lg text-theme-textMuted leading-relaxed font-bold italic relative z-10 pl-4"
               >
-                "At Future Stars, education extends far beyond textbooks. We spark creativity, build resilience, and encourage our kids to explore their passions. Together, we cultivate a community of brave thinkers and innovative leaders ready to impact the world."
+                "At {school.name || 'our school'}, education extends far beyond textbooks. We spark creativity, build resilience, and encourage our kids to explore their passions. Together, we cultivate a community of brave thinkers and innovative leaders ready to impact the world."
               </p>
             </div>
 
@@ -301,8 +303,8 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
 
             {/* Playful Credentials */}
             <div className="flex flex-col items-start lg:items-center mt-4">
-              <div className="font-serif text-2xl text-theme-primary italic rotate-[-1deg]">Dr. Sarah Jenkins</div>
-              <div className="text-xs font-black uppercase tracking-widest text-theme-textMuted mt-1">Head of School & Director</div>
+              <div className="font-serif text-2xl text-theme-primary italic rotate-[-1deg]">{school.principal_name || 'Dr. Sarah Jenkins'}</div>
+              <div className="text-xs font-black uppercase tracking-widest text-theme-textMuted mt-1">{school.school_type ? `Principal, ${school.school_type}` : 'Head of School & Director'}</div>
             </div>
           </div>
         </div>
@@ -345,6 +347,12 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
              <div className="text-theme-primary">Nav</div>
              <div className="text-slate-500 hover:text-white transition-colors cursor-pointer">Academics</div>
              <div className="text-slate-500 hover:text-white transition-colors cursor-pointer">Faculty</div>
+          </div>
+          <div className="space-y-3">
+             <div className="text-theme-primary">Contact</div>
+             <div className="text-slate-500 normal-case font-medium text-[11px] leading-relaxed">{school.address || '12 Main Boulevard, Sector C, Srinagar, J&K'}</div>
+             <div className="text-slate-500 normal-case font-medium text-[11px]">{school.contact_number || '+91 98765 43210'}</div>
+             <div className="text-theme-primary text-[10px] font-black tracking-widest uppercase">{school.school_type || 'High School'}</div>
           </div>
           <div className="space-y-3">
              <div className="text-theme-primary">Legal</div>
@@ -412,6 +420,8 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
             switch (sectionId) {
               case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
               case 'stats': return <React.Fragment key="stats">{renderStats()}</React.Fragment>;
+              case 'interactive-campus': return <InteractiveCampus key="interactive-campus" school={school} theme={theme} isFullPage={isFullPage} />;
+              case 'virtual-reception': return <VirtualReception key="virtual-reception" school={school} theme={theme} isFullPage={isFullPage} />;
               case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
               case 'principal': return <React.Fragment key="principal">{renderPrincipal()}</React.Fragment>;
               case 'banner': return <React.Fragment key="banner">{renderBanner()}</React.Fragment>;

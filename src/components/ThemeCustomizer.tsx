@@ -648,8 +648,10 @@ export default function ThemeCustomizer({ school }: { school?: any }) {
                                 {isVisible ? '👁️' : '🙈'}
                               </button>
                               <span className={`text-[10px] font-black uppercase tracking-wider ${isVisible ? 'text-slate-200' : 'text-slate-600 line-through'}`}>
-                                {section === 'hero' ? 'Hero Banner' :
-                                 section === 'stats' ? 'Stats Stats' :
+                                {section === 'virtual-reception' ? '✨ Virtual Reception (Premium)' :
+                                 section === 'hero' ? 'Hero Banner' :
+                                 section === 'stats' ? 'Stats Counters' :
+                                 section === 'interactive-campus' ? '✨ Campus Experience (Premium)' :
                                  section === 'about' ? 'About Story' :
                                  section === 'principal' ? "Principal's Desk" :
                                  section === 'banner' ? 'Registration' :

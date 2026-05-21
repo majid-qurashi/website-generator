@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
 import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
 import { ThemeConfig } from '@/types/theme';
+import InteractiveCampus from '@/components/templates/InteractiveCampus';
+import VirtualReception from '@/components/templates/VirtualReception';
 
 interface TemplateProps {
   onSelect?: () => void;
@@ -155,14 +157,21 @@ export default function MinimalTemplateThree({ onSelect, data = defaultData, isF
   const renderFooter = () => (
     <footer className="bg-theme-navbar border-t border-theme-border py-32 px-16">
        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-12 md:space-y-0">
-          <div 
-            style={{ fontFamily: theme.typography.headingFont }}
-            className="text-4xl font-black italic tracking-tighter opacity-10 text-theme-text font-themeHeading"
-          >
-            {school.name}
+          <div className="flex flex-col space-y-4">
+             <div 
+               style={{ fontFamily: theme.typography.headingFont }}
+               className="text-4xl font-black italic tracking-tighter opacity-20 text-theme-text font-themeHeading"
+             >
+               {school.name}
+             </div>
+             <div className="flex flex-col space-y-2 text-xs text-theme-textMuted font-bold">
+                <span>{school.address || '12 Main Boulevard, Sector C, Srinagar, J&K'}</span>
+                <span className="text-theme-primary">{school.contact_number || '+91 98765 43210'}</span>
+                <span className="text-theme-secondary uppercase tracking-widest text-[10px]">{school.school_type || 'High School'}</span>
+             </div>
           </div>
           <p className="font-black text-xs md:text-base tracking-[0.5em] uppercase text-theme-textMuted text-center md:text-right">
-            Developed by <br/> <a href="https://qurashi.vercel.app" target="_blank" className="text-theme-primary hover:text-theme-primaryHover transition-colors underline underline-offset-8 mt-4 inline-block">Majid Qurashi</a>
+            Developed by <br/> <a href="https://qurashi.vercel.app" target="_blank" className="text-theme-primary hover:text-theme-primaryHover transition-colors underline underline-offset-8 mt-4 inline-block font-black">Majid Qurashi</a>
           </p>
        </div>
     </footer>
@@ -188,6 +197,8 @@ export default function MinimalTemplateThree({ onSelect, data = defaultData, isF
           if (!isVisible(sectionId)) return null;
           switch (sectionId) {
             case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
+            case 'interactive-campus': return <InteractiveCampus key="interactive-campus" school={school} theme={theme} isFullPage={isFullPage} />;
+            case 'virtual-reception': return <VirtualReception key="virtual-reception" school={school} theme={theme} isFullPage={isFullPage} />;
             case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
             case 'footer': return <React.Fragment key="footer">{renderFooter()}</React.Fragment>;
             default: return null;

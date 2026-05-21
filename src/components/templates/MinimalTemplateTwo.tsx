@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
 import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
 import { ThemeConfig } from '@/types/theme';
+import InteractiveCampus from '@/components/templates/InteractiveCampus';
+import VirtualReception from '@/components/templates/VirtualReception';
 
 interface TemplateProps {
   onSelect?: () => void;
@@ -168,6 +170,11 @@ export default function MinimalTemplateTwo({ onSelect, data = defaultData, isFul
   const renderFooter = () => (
     <footer className="bg-theme-footer text-theme-textMuted py-24 px-12 text-center flex flex-col items-center border-t border-theme-border">
        <div className="w-12 h-0.5 bg-theme-primary mb-12"></div>
+       <div className="max-w-4xl mx-auto flex flex-col items-center space-y-4 mb-12 text-center">
+          <p className="text-theme-text font-semibold text-xs md:text-sm tracking-wide">{school.address || '12 Main Boulevard, Sector C, Srinagar, J&K'}</p>
+          <p className="text-theme-primary font-bold text-xs md:text-sm">{school.contact_number || '+91 98765 43210'}</p>
+          <p className="text-theme-secondary font-black text-[10px] uppercase tracking-widest">{school.school_type || 'High School'}</p>
+       </div>
        <p className="font-bold text-xs md:text-sm tracking-widest uppercase text-theme-textMuted">
          Developed by <a href="https://qurashi.vercel.app" target="_blank" className="text-theme-primary hover:text-white transition-colors underline underline-offset-8 font-black">Majid Qurashi</a>
        </p>
@@ -195,6 +202,8 @@ export default function MinimalTemplateTwo({ onSelect, data = defaultData, isFul
           if (!isVisible(sectionId)) return null;
           switch (sectionId) {
             case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
+            case 'interactive-campus': return <InteractiveCampus key="interactive-campus" school={school} theme={theme} isFullPage={isFullPage} />;
+            case 'virtual-reception': return <VirtualReception key="virtual-reception" school={school} theme={theme} isFullPage={isFullPage} />;
             case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
             case 'footer': return <React.Fragment key="footer">{renderFooter()}</React.Fragment>;
             default: return null;
