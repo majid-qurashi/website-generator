@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
 import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
 import { ThemeConfig } from '@/types/theme';
@@ -27,6 +27,7 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
 
   const context = useSchoolTheme();
   const theme = customTheme || context?.theme || PRESETS['modern-blue'];
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isVisible = (sectionId: string) => theme.layout.sectionsVisibility[sectionId] !== false;
 
@@ -34,10 +35,6 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
   const textAlignmentClass = 
     theme.layout.mainTextAlignment === 'center' ? 'text-center' : 
     theme.layout.mainTextAlignment === 'right' ? 'text-right' : 'text-left';
-
-  const logoAlignClass = 
-    theme.layout.logoAlignment === 'center' ? 'mx-auto flex-col text-center' :
-    theme.layout.logoAlignment === 'right' ? 'ml-auto flex-row-reverse space-x-reverse' : 'flex-row';
 
   // Hover animations classes
   const hoverAnimClass = 
@@ -54,63 +51,85 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
     const isCenter = theme.layout.logoAlignment === 'center';
     const isRight = theme.layout.logoAlignment === 'right';
 
-    const navbarClass = `z-50 transition-all ${
+    const navbarClass = `z-[100] transition-all w-full ${
       theme.layout.stickyNavbar ? 'sticky top-0' : 'relative'
     } ${
       theme.branding.bgBlur === 'sm' ? 'backdrop-blur-sm' :
       theme.branding.bgBlur === 'md' ? 'backdrop-blur-md' :
       theme.branding.bgBlur === 'lg' ? 'backdrop-blur-lg' : 'backdrop-blur-none'
-    } px-6 py-6 md:px-12 bg-theme-navbar/80 border-b border-theme-border shadow-sm flex ${
-      isCenter 
-        ? 'flex-col items-center space-y-4 text-center' 
-        : isRight 
-          ? 'flex-col md:flex-row-reverse justify-between items-center space-y-4 md:space-y-0' 
-          : 'flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0'
-    }`;
-
-    const logoAlignClass = isCenter
-      ? "flex flex-col items-center space-y-2"
-      : "flex items-center space-x-3";
+    } px-6 py-5 md:px-12 bg-theme-navbar/90 border-b border-theme-border/60 shadow-sm flex items-center justify-between`;
 
     return (
       <nav style={transitionSpeedStyle} className={navbarClass}>
-        <div className={`${logoAlignClass} group/logo cursor-pointer`}>
+        <div className={`flex items-center ${isCenter ? 'mx-auto flex-col text-center space-y-2' : isRight ? 'ml-auto flex-row-reverse space-x-reverse' : 'space-x-3'} group/logo cursor-pointer`}>
           {school.logo ? (
             <img 
               src={school.logo} 
               alt="Logo" 
               style={{ height: theme.branding.logoSize }}
-              className="rounded-2xl rotate-3 shadow-lg" 
+              className="rounded-2xl rotate-3 shadow-lg border border-theme-border/30" 
             />
           ) : (
             <div 
               style={{ width: theme.branding.logoSize, height: theme.branding.logoSize }}
-              className="rounded-tl-[1.5rem] rounded-br-[1.5rem] bg-theme-primary text-theme-btnText flex items-center justify-center font-black text-xl shadow-xl rotate-3"
+              className="rounded-tl-[1.5rem] rounded-br-[1.5rem] bg-theme-primary text-theme-btnText flex items-center justify-center font-black text-xl shadow-xl rotate-3 select-none"
             >
-              F
+              {(school.name || defaultData.name || 'S').charAt(0)}
             </div>
           )}
-          <span className="font-themeHeading font-black text-theme-text tracking-widest uppercase italic text-xl md:text-3xl select-none">
-            {school.name}
+          <span className="font-themeHeading font-black text-theme-text tracking-widest uppercase italic text-xl md:text-2xl select-none">
+            {school.name || defaultData.name}
           </span>
         </div>
-        <div className="flex items-center space-x-4">
-           <div className="px-8 py-3 rounded-full bg-theme-cardBg text-theme-text font-black text-sm shadow border border-theme-border hover:bg-theme-primary hover:text-theme-btnText cursor-pointer transition-colors">
+
+        {/* Desktop Nav Items */}
+        <div className="hidden md:flex items-center space-x-4">
+           <div className="px-6 py-2.5 rounded-full bg-theme-cardBg text-theme-text font-black text-xs shadow border border-theme-border/60 hover:bg-theme-primary hover:text-theme-btnText cursor-pointer transition-colors">
              Programs
            </div>
            <button 
              style={transitionSpeedStyle}
-             className={`bg-theme-btnBg hover:bg-theme-primaryHover text-theme-btnText font-black text-sm shadow-xl shadow-theme-primary/10 select-none ${theme.components.buttonStyle} ${hoverAnimClass}`}
+             className={`bg-theme-btnBg hover:bg-theme-primaryHover text-theme-btnText font-black text-xs px-6 py-2.5 shadow-xl shadow-theme-primary/10 select-none ${theme.components.buttonStyle} ${hoverAnimClass}`}
            >
              Contact Us
            </button>
         </div>
+
+        {/* Mobile Hamburger Button */}
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-theme-text p-2 hover:bg-theme-border/30 rounded-lg transition-colors cursor-pointer"
+            aria-label="Toggle Menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16m-7 6h7" />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile Dropdown Drawer */}
+        {isMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-theme-navbar border-b border-theme-border/60 shadow-xl px-6 py-4 flex flex-col space-y-3 z-[150] animate-fadeIn md:hidden">
+            <span className="text-theme-text font-black text-sm hover:text-theme-primary transition-colors py-2.5 px-4 bg-theme-cardBg rounded-2xl cursor-pointer">Programs</span>
+            <button 
+              style={transitionSpeedStyle}
+              className={`bg-theme-btnBg hover:bg-theme-primaryHover text-theme-btnText font-black text-sm w-full py-3 shadow-xl shadow-theme-primary/10 ${theme.components.buttonStyle} ${hoverAnimClass}`}
+            >
+              Contact Us
+            </button>
+          </div>
+        )}
       </nav>
     );
   };
 
   const renderHero = () => (
-    <header className={`${isFullPage ? 'px-4 md:px-8 py-4 md:py-8 max-w-7xl mx-auto w-full' : 'px-5 pb-6'}`}>
+    <header className={`${isFullPage ? 'px-4 md:px-8 py-4 md:py-8 max-w-7xl mx-auto w-full' : 'px-5 pb-4'}`}>
       <div className={`bg-theme-cardBg rounded-[3.5rem] md:rounded-[5rem] shadow-theme border border-theme-border flex flex-col items-center relative overflow-hidden ${isFullPage ? 'p-10 md:p-24' : 'p-8'} ${textAlignmentClass}`}>
         
         {/* Animated Background Blobs */}
@@ -126,9 +145,9 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
             style={{ fontFamily: theme.typography.headingFont, fontWeight: theme.typography.fontWeight }}
             className={`text-theme-text font-black leading-[1] mb-8 md:mb-10 ${isFullPage ? 'text-4xl md:text-6xl lg:text-8xl max-w-5xl' : 'text-3xl'}`}
           >
-            {school.tagline?.split(' ').slice(0, -2).join(' ')} <br/>
+            {(school.tagline || defaultData.tagline || '').split(' ').slice(0, -2).join(' ')} <br/>
             <span className="text-theme-primary underline decoration-theme-secondary decoration-8 underline-offset-[12px] italic">
-              {school.tagline?.split(' ').slice(-2).join(' ')}
+              {(school.tagline || defaultData.tagline || '').split(' ').slice(-2).join(' ')}
             </span>
           </h1>
           
@@ -136,7 +155,7 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
             style={{ fontFamily: theme.typography.bodyFont }}
             className={`text-theme-textMuted mx-auto mb-10 leading-relaxed font-bold max-w-3xl ${isFullPage ? 'text-sm md:text-xl' : 'text-[10px] max-w-xs'}`}
           >
-            {school.description}
+            {school.description || defaultData.description}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6">
@@ -224,6 +243,73 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
     </section>
   );
 
+  const renderPrincipal = () => {
+    return (
+      <section className="py-20 md:py-24 px-6 relative max-w-7xl mx-auto overflow-hidden w-full">
+        {/* Playful background highlights */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-theme-primary/5 rounded-full blur-[90px]" />
+        
+        <div className="bg-theme-cardBg rounded-[4rem] p-10 md:p-16 border border-theme-border/60 shadow-theme grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-theme-secondary/5 rounded-full blur-3xl pointer-events-none" />
+          
+          {/* Left Column: Image in creative organic pill frame */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="relative group w-full max-w-xs">
+              {/* Rotating behind highlight */}
+              <div className="absolute -inset-2 bg-gradient-to-tr from-theme-secondary to-theme-primary rounded-tr-[4rem] rounded-bl-[4rem] opacity-25 blur-md group-hover:rotate-6 transition duration-700" />
+              
+              <div className="relative rounded-tr-[3.5rem] rounded-bl-[3.5rem] overflow-hidden border-4 border-theme-border bg-theme-cardBg shadow-xl aspect-[4/5]">
+                <img 
+                  src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=600" 
+                  className="object-cover w-full h-full transform transition duration-1000 group-hover:scale-105" 
+                  alt="Principal Desk Portrait" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-theme-primary/40 to-transparent mix-blend-multiply" />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Text & Quote */}
+          <div className={`lg:col-span-7 ${textAlignmentClass}`}>
+            <div className="inline-flex items-center space-x-2 py-2 px-6 rounded-full bg-theme-primary/10 text-theme-primary font-black text-xs uppercase tracking-widest mb-6">
+              <span>💫</span> <span>Principal's Desk</span>
+            </div>
+
+            <h2 
+              style={{ fontFamily: theme.typography.headingFont }}
+              className="text-3xl md:text-5xl font-black text-theme-text mb-6 leading-none tracking-tight"
+            >
+              Inspiring Minds, <br/>
+              <span className="text-theme-primary underline decoration-theme-secondary decoration-6 underline-offset-4 italic">
+                Shaping Futures
+              </span>
+            </h2>
+
+            <div className="relative mb-6">
+              <span className="absolute -top-4 -left-4 text-7xl text-theme-secondary/20 pointer-events-none font-serif">“</span>
+              <p 
+                style={{ fontFamily: theme.typography.bodyFont }}
+                className="text-base md:text-lg text-theme-textMuted leading-relaxed font-bold italic relative z-10 pl-4"
+              >
+                "At Future Stars, education extends far beyond textbooks. We spark creativity, build resilience, and encourage our kids to explore their passions. Together, we cultivate a community of brave thinkers and innovative leaders ready to impact the world."
+              </p>
+            </div>
+
+            <p className="text-sm md:text-base text-theme-textMuted leading-relaxed mb-8">
+              We look forward to partnering with parents and our local community to offer an incredible education that meets every student's individual talents. Feel free to connect with our administrative team for a campus tour.
+            </p>
+
+            {/* Playful Credentials */}
+            <div className="flex flex-col items-start lg:items-center mt-4">
+              <div className="font-serif text-2xl text-theme-primary italic rotate-[-1deg]">Dr. Sarah Jenkins</div>
+              <div className="text-xs font-black uppercase tracking-widest text-theme-textMuted mt-1">Head of School & Director</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  };
+
   const renderBanner = () => (
     <div className={`relative ${isFullPage ? 'max-w-7xl mx-auto px-6 md:px-8 py-12' : 'px-5 pb-8'}`}>
       <div className="bg-slate-900 text-white p-8 md:p-16 rounded-[4rem] flex flex-col md:flex-row items-center justify-between relative overflow-hidden group/banner shadow-theme">
@@ -248,11 +334,11 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
   );
 
   const renderFooter = () => (
-    <footer className="bg-slate-950 text-slate-300 py-20 px-8 border-t border-slate-900">
+    <footer className="bg-slate-950 text-slate-350 py-20 px-8 border-t border-slate-900 w-full">
       <div className="max-w-7xl mx-auto flex flex-col items-center">
         <div className="flex items-center space-x-3 mb-10">
           <div className="w-10 h-10 rounded-tl-[1.2rem] rounded-br-[1.2rem] bg-theme-primary shadow" />
-          <span className="font-themeHeading font-black text-white text-3xl tracking-tighter italic uppercase">{school.name}</span>
+          <span className="font-themeHeading font-black text-white text-3xl tracking-tighter italic uppercase">{school.name || defaultData.name}</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center md:text-left mb-16 w-full font-black uppercase tracking-widest text-[10px] md:text-xs">
           <div className="space-y-3">
@@ -268,8 +354,8 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
           <div className="col-span-2 flex flex-col items-center md:items-end space-y-4">
               <div className="text-slate-500 font-bold normal-case text-center md:text-right text-sm">Join 5,000+ students on their journey to the stars.</div>
               <div className="bg-white/5 p-3 rounded-[1.5rem] flex space-x-4">
-                 <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-theme-primary cursor-pointer transition-colors text-xs font-bold">IG</div>
-                 <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-theme-primary cursor-pointer transition-colors text-xs font-bold">YT</div>
+                 <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-theme-primary cursor-pointer transition-colors text-xs font-bold select-none">IG</div>
+                 <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-theme-primary cursor-pointer transition-colors text-xs font-bold select-none">YT</div>
               </div>
           </div>
         </div>
@@ -294,10 +380,10 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
       {/* Playful Header (Only in Preview) */}
       {!isFullPage && (
         <div className="bg-theme-cardBg px-6 py-3 flex justify-between items-center border-b border-theme-border">
-          <div className="text-[10px] font-black text-theme-primary tracking-wider uppercase italic">{school.name}</div>
+          <div className="text-[10px] font-black text-theme-primary tracking-wider uppercase italic">{school.name || defaultData.name}</div>
           <div className="flex space-x-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-rose-450" />
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-450" />
+            <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
           </div>
         </div>
       )}
@@ -309,17 +395,31 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
       <div className={`${!isFullPage ? 'h-[400px] overflow-y-auto no-scrollbar relative select-none' : 'w-full'}`}>
         
         {/* Render sections dynamically according to admin-specified order & visibilities */}
-        {theme.layout.sectionsOrder.map((sectionId) => {
-          if (!isVisible(sectionId)) return null;
-          switch (sectionId) {
-            case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
-            case 'stats': return <React.Fragment key="stats">{renderStats()}</React.Fragment>;
-            case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
-            case 'banner': return <React.Fragment key="banner">{renderBanner()}</React.Fragment>;
-            case 'footer': return <React.Fragment key="footer">{renderFooter()}</React.Fragment>;
-            default: return null;
+        {(() => {
+          // Backwards compatibility injection
+          const sections = [...theme.layout.sectionsOrder];
+          if (!sections.includes('principal')) {
+            const aboutIndex = sections.indexOf('about');
+            if (aboutIndex !== -1) {
+              sections.splice(aboutIndex + 1, 0, 'principal');
+            } else {
+              sections.splice(sections.length - 1, 0, 'principal');
+            }
           }
-        })}
+
+          return sections.map((sectionId) => {
+            if (!isVisible(sectionId)) return null;
+            switch (sectionId) {
+              case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
+              case 'stats': return <React.Fragment key="stats">{renderStats()}</React.Fragment>;
+              case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
+              case 'principal': return <React.Fragment key="principal">{renderPrincipal()}</React.Fragment>;
+              case 'banner': return <React.Fragment key="banner">{renderBanner()}</React.Fragment>;
+              case 'footer': return <React.Fragment key="footer">{renderFooter()}</React.Fragment>;
+              default: return null;
+            }
+          });
+        })()}
 
         {/* Fade Out (Only in Preview) */}
         {!isFullPage && (
@@ -332,7 +432,7 @@ export default function TemplateTwo({ onSelect, data = defaultData, isFullPage =
         <div className="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-[200] flex flex-col items-center justify-center backdrop-blur-md rounded-[2.5rem]">
           <button
             onClick={onSelect}
-            className="bg-theme-primary text-theme-btnText font-black px-10 py-4 rounded-[1.5rem] transform scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500 hover:bg-theme-primaryHover shadow-2xl shadow-theme-primary/40"
+            className="bg-theme-primary text-theme-btnText font-black px-10 py-4 rounded-[1.5rem] transform scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500 hover:bg-theme-primaryHover shadow-2xl shadow-theme-primary/40 cursor-pointer"
           >
             Select Style Two
           </button>

@@ -11,28 +11,25 @@ import { SchoolThemeProvider } from '@/components/SchoolThemeProvider';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
-  params: Promise<{ email: string }>;
+  params: Promise<{ subdomain: string }>;
 }
 
-export default async function SchoolWebsitePage({ params }: PageProps) {
-  const { email } = await params;
-  
-  // Decoding email in case it's URL encoded (e.g. %40 for @)
-  const decodedEmail = decodeURIComponent(email);
+export default async function SubdomainSchoolPage({ params }: PageProps) {
+  const { subdomain } = await params;
+  const decodedSubdomain = decodeURIComponent(subdomain).toLowerCase();
 
-  // Fetch school data from Supabase
+  // Fetch school data from Supabase using subdomain
   const { data: school, error } = await supabase
     .from('schools')
     .select('*')
-    .eq('email', decodedEmail)
+    .eq('subdomain', decodedSubdomain)
     .single();
 
   if (error || !school) {
-    console.error('Error fetching school:', error);
+    console.error('Error fetching school by subdomain:', error);
     return notFound();
   }
 
-  // Choose template based on school.template
   const renderTemplate = () => {
     const props = {
       data: school,
@@ -56,7 +53,6 @@ export default async function SchoolWebsitePage({ params }: PageProps) {
       case 'minimal4':
         return <MinimalTemplateRP {...props} />;
       default:
-        // Fallback logic
         if (school.template?.startsWith('minimal')) return <MinimalTemplateOne {...props} />;
         return <TemplateOne {...props} />;
     }
@@ -67,10 +63,10 @@ export default async function SchoolWebsitePage({ params }: PageProps) {
       <main className="min-h-screen bg-theme-bg text-theme-text transition-colors duration-300">
         {renderTemplate()}
         
-        {/* Admin Floating actions */}
+        {/* Admin Floating actions pointing back to primary platform site for session state security */}
         <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50 flex items-center space-x-2.5 sm:space-x-3">
           <a 
-            href={`/school/${email}/customize`}
+            href={`http://localhost:3000/school/${school.email}/customize`}
             title="Customize Theme"
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold w-11 h-11 sm:w-auto sm:h-auto py-3 px-3 sm:py-3 sm:px-5 md:py-3.5 md:px-6 rounded-full shadow-2xl flex items-center justify-center sm:space-x-2 transition-all transform hover:scale-105 border border-indigo-400/20 text-base sm:text-sm md:text-base"
           >
@@ -78,7 +74,7 @@ export default async function SchoolWebsitePage({ params }: PageProps) {
             <span className="hidden sm:inline">Customize Theme</span>
           </a>
           <a 
-            href="/admin/login"
+            href="http://localhost:3000/admin/login"
             title="Admin Login"
             className="bg-slate-900 hover:bg-slate-800 text-white font-bold w-11 h-11 sm:w-auto sm:h-auto py-3 px-3 sm:py-3 sm:px-5 md:py-3.5 md:px-6 rounded-full shadow-2xl flex items-center justify-center sm:space-x-2 transition-all transform hover:scale-105 border border-slate-700/30 text-base sm:text-sm md:text-base"
           >
@@ -90,4 +86,3 @@ export default async function SchoolWebsitePage({ params }: PageProps) {
     </SchoolThemeProvider>
   );
 }
-

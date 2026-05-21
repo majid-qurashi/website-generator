@@ -107,7 +107,7 @@ function CustomizerDashboard({ school }: ClientProps) {
     <div className="flex flex-col h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans select-none">
       
       {/* Visual Workspace Top Bar */}
-      <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 z-20 select-none">
+      <header className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 sm:px-6 z-20 select-none">
         
         {/* Toggle Sidebar & School Info */}
         <div className="flex items-center space-x-4">
@@ -126,7 +126,7 @@ function CustomizerDashboard({ school }: ClientProps) {
         </div>
 
         {/* Viewport Toggles (Desktop, Tablet, Mobile) */}
-        <div className="flex items-center bg-slate-950/60 p-1 rounded-2xl border border-slate-800/80 space-x-0.5 shadow-inner">
+        <div className="hidden md:flex items-center bg-slate-950/60 p-1 rounded-2xl border border-slate-800/80 space-x-0.5 shadow-inner">
           <button
             onClick={() => setViewport('desktop')}
             className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center space-x-1.5 transition-all cursor-pointer ${viewport === 'desktop' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
@@ -148,34 +148,37 @@ function CustomizerDashboard({ school }: ClientProps) {
         </div>
 
         {/* Cloud Persistence Buttons */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           
           {/* Status Indicator Lights */}
-          <div className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-2 rounded-full bg-slate-950 border border-slate-800 transition-all duration-300">
+          <div 
+            title={autoSaveStatus === 'saving' ? "Saving..." : autoSaveStatus === 'saved' ? "All changes saved" : autoSaveStatus === 'error' ? "Error saving changes" : dirty ? "You have unsaved changes" : "All changes synced"}
+            className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-widest px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-slate-950 border border-slate-800 transition-all duration-300"
+          >
             {autoSaveStatus === 'saving' ? (
               <>
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_#6366f1]" />
-                <span className="text-indigo-400 animate-pulse">Saving...</span>
+                <span className="text-indigo-400 animate-pulse hidden sm:inline">Saving...</span>
               </>
             ) : autoSaveStatus === 'saved' ? (
               <>
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
-                <span className="text-emerald-400">Saved</span>
+                <span className="text-emerald-400 hidden sm:inline">Saved</span>
               </>
             ) : autoSaveStatus === 'error' ? (
               <>
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-bounce" />
-                <span className="text-rose-450">Save Failed</span>
+                <span className="text-rose-450 hidden sm:inline">Save Failed</span>
               </>
             ) : dirty ? (
               <>
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-amber-400 font-bold">Unsaved Changes</span>
+                <span className="text-amber-400 font-bold hidden sm:inline">Unsaved Changes</span>
               </>
             ) : (
               <>
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                <span className="text-emerald-400">Synced</span>
+                <span className="text-emerald-400 hidden sm:inline">Synced</span>
               </>
             )}
           </div>
@@ -183,7 +186,7 @@ function CustomizerDashboard({ school }: ClientProps) {
           <button
             onClick={handlePublish}
             disabled={loading}
-            className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow-xl active:scale-[0.98] ${
+            className={`px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow-xl active:scale-[0.98] ${
               loading 
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
                 : saveStatus === 'success'
@@ -203,7 +206,7 @@ function CustomizerDashboard({ school }: ClientProps) {
         <div className={`transition-all duration-300 ease-in-out flex-shrink-0 h-full overflow-hidden ${
           sidebarOpen ? 'w-full lg:w-[420px]' : 'w-0'
         }`}>
-          <ThemeCustomizer />
+          <ThemeCustomizer school={school} />
         </div>
 
         {/* Right Side: Virtualized Viewports preview canvas */}
