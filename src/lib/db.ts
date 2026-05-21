@@ -62,11 +62,11 @@ const getUseMemoryDB = (): boolean => {
     _useMemoryDB?: boolean;
   };
   
-  // Proactive check: if database URL is missing or points to the remote supabase that was failing
+  // Only force sandbox mode if DATABASE_URL is completely missing
   if (globalWithMemory._useMemoryDB === undefined) {
-    if (!connectionString || connectionString.includes('db.pzkonvssbdqhauqrkvbl.supabase.co')) {
+    if (!connectionString) {
       globalWithMemory._useMemoryDB = true;
-      console.warn('🔌 Proactively enabled LOCAL DEVELOPER SANDBOX MODE (In-Memory DB emulation) due to missing or remote offline database host.');
+      console.warn('🔌 DATABASE_URL is not set. Enabling LOCAL DEVELOPER SANDBOX MODE (In-Memory DB emulation).');
     } else {
       globalWithMemory._useMemoryDB = false;
     }

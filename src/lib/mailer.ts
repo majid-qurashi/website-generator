@@ -315,19 +315,26 @@ export async function sendEmail({ to, subject, templateName, templateData }: Sen
   }
 
   // Developer Sandbox Fallback Mode
-  // We log details and write the beautiful HTML payload to a local preview file
+  // On Vercel/serverless environments the filesystem is read-only.
+  // We skip writing the HTML file and just log details + return the OTP directly.
   try {
-    const previewDir = path.join(process.cwd(), 'public', 'email-previews');
-    if (!fs.existsSync(previewDir)) {
-      fs.mkdirSync(previewDir, { recursive: true });
-    }
-    
-    const fileName = `preview_${templateName}_${to.replace(/[^a-z0-9]/gi, '_')}.html`;
-    const filePath = path.join(previewDir, fileName);
-    fs.writeFileSync(filePath, finalHtml);
-    
-    const webPath = `/email-previews/${fileName}`;
-    
+    const webPath = (() => {
+      try {
+        // Only attempt filesystem write in local development (writable FS)
+        const previewDir = path.join(process.cwd(), 'public', 'email-previews');
+        if (!fs.existsSync(previewDir)) {
+          fs.mkdirSync(previewDir, { recursive: true });
+        }
+        const fileName = `preview_${templateName}_${to.replace(/[^a-z0-9]/gi, '_')}.html`;
+        const filePath = path.join(previewDir, fileName);
+        fs.writeFileSync(filePath, finalHtml);
+        return `/email-previews/${fileName}`;
+      } catch {
+        // Read-only filesystem (Vercel/serverless) — skip file write gracefully
+        return null;
+      }
+    })();
+
     console.log('\n==================================================');
     console.log('📬  DEVELOPER EMAIL SANDBOX PREVIEW');
     console.log('==================================================');
@@ -337,18 +344,29 @@ export async function sendEmail({ to, subject, templateName, templateData }: Sen
     if (templateData.otpCode) {
       console.log(`🔑 OTP:    ${templateData.otpCode}`);
     }
-    console.log(`🔗 Local Browser URL to Preview Email HTML:`);
-    console.log(`   http://localhost:3000${webPath}`);
+    if (webPath) {
+      console.log(`🔗 Local Browser URL to Preview Email HTML:`);
+      console.log(`   http://localhost:3000${webPath}`);
+    } else {
+      console.log(`ℹ️  Running on serverless (read-only FS). Email preview file not written.`);
+      console.log(`ℹ️  Set RESEND_API_KEY in environment variables to send real emails.`);
+    }
     console.log('==================================================\n');
-    
-    return { 
-      success: true, 
-      method: 'sandbox', 
-      previewUrl: `http://localhost:3000${webPath}`,
-      otpCode: templateData.otpCode 
+
+    return {
+      success: true,
+      method: 'sandbox',
+      previewUrl: webPath ? `http://localhost:3000${webPath}` : null,
+      otpCode: templateData.otpCode
     };
   } catch (writeErr: any) {
-    console.error('❌ Failed to write local sandbox HTML email:', writeErr.message);
-    return { success: false, error: writeErr.message };
+    console.error('❌ Sandbox fallback failed:', writeErr.message);
+    // Last-resort: still return sandbox success so registration can proceed
+    return {
+      success: true,
+      method: 'sandbox',
+      previewUrl: null,
+      otpCode: templateData.otpCode
+    };
   }
 }
