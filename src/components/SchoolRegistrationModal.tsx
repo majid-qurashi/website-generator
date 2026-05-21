@@ -835,7 +835,7 @@ export default function SchoolRegistrationModal({
                     type="text" 
                     value={principalName}
                     onChange={(e) => setPrincipalName(e.target.value)}
-                    placeholder="Er. Majid Qurashi" 
+                    placeholder="Majid Qurashi" 
                     className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 focus:border-indigo-500 outline-none text-slate-800 dark:text-slate-100 font-bold transition" 
                   />
                   {errors.principalName && <p className="text-red-500 text-xs mt-1 px-1 font-bold">{errors.principalName}</p>}
