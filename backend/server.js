@@ -36,7 +36,8 @@ const initDB = async () => {
                 description TEXT,
                 logo VARCHAR(255),
                 image VARCHAR(255),
-                template VARCHAR(50)
+                template VARCHAR(50),
+                theme_settings JSONB
             );
         `);
         try {
@@ -44,8 +45,11 @@ const initDB = async () => {
             await pool.query(`ALTER TABLE schools ADD COLUMN description TEXT;`);
             await pool.query(`ALTER TABLE schools ADD COLUMN logo VARCHAR(255);`);
             await pool.query(`ALTER TABLE schools ADD COLUMN image VARCHAR(255);`);
+        } catch (e) {}
+        try {
+            await pool.query(`ALTER TABLE schools ADD COLUMN theme_settings JSONB;`);
         } catch (e) {
-            // Columns might already exist
+            // Column might already exist
         }
         console.log("Database table 'schools' is verified and ready.");
     } catch (err) {
@@ -104,6 +108,23 @@ app.post("/select-template", async (req, res) => {
         res.json("Template Selected");
     } catch (err) {
         console.error("Template Error:", err.message);
+        res.status(500).json({ error: "Server Error", details: err.message });
+    }
+});
+
+/* STEP 4: Save Theme Settings */
+app.post("/save-theme-settings", async (req, res) => {
+    try {
+        const { email, themeSettings } = req.body;
+
+        await pool.query(
+            "UPDATE schools SET theme_settings = $1 WHERE email = $2",
+            [JSON.stringify(themeSettings), email]
+        );
+
+        res.json({ success: true, message: "Theme Settings Saved" });
+    } catch (err) {
+        console.error("Save Theme Settings Error:", err.message);
         res.status(500).json({ error: "Server Error", details: err.message });
     }
 });

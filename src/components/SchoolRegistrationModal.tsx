@@ -121,8 +121,11 @@ export default function SchoolRegistrationModal({
     setErrors({});
     console.log("Starting registration for:", registrationData.schoolEmail);
     
+    let registrationSuccess = false;
+    let authErrorMsg = "";
+
     try {
-      // 1. Create user in Auth
+      // 1. Try cloud Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registrationData.schoolEmail,
         password: registrationData.password,
@@ -130,7 +133,6 @@ export default function SchoolRegistrationModal({
 
       if (authError) {
         console.error("Auth Error:", authError);
-        // Special case: User might already exist in Auth but not in our 'schools' DB table
         if (authError.message.includes('already registered')) {
           console.warn("User already exists in Auth, attempting to proceed to Database step...");
         } else {
@@ -138,35 +140,61 @@ export default function SchoolRegistrationModal({
         }
       }
 
-      console.log("Auth step handled, starting database sync...");
+      console.log("Auth step handled, starting cloud database sync...");
 
-      // 2. Initial entry in schools table
-      // We use upsert to ensure that if the record exists, we just update/confirm it
+      // 2. Try cloud Supabase DB
       const { error: dbError } = await supabase.from('schools').upsert({
         email: registrationData.schoolEmail,
         name: registrationData.schoolName,
       }, { onConflict: 'email' });
 
       if (dbError) {
-        console.error("Database Sync Error:", dbError);
-        // Important: If this is an RLS error, it means the table is protected
-        if (dbError.code === '42501') {
-          throw new Error("Database Security Error: Permission denied. Check RLS policies.");
-        }
         throw dbError;
       }
 
-      console.log("Registration successful! Moving to details step.");
-      setStep('details');
+      console.log("Cloud registration successful! Moving to details step.");
+      registrationSuccess = true;
     } catch (err: any) {
-      console.error("Registration Process Exception:", err);
-      // Give the user a clear alert with more details
-      const errorMessage = err.message || "Unknown error";
-      const errorDetails = err.details || "";
-      alert(`⚠️ Registration failed!\n\nMessage: ${errorMessage}\n${errorDetails ? `Details: ${errorDetails}` : ''}\n\nPlease check your internet connection or if the school email is already in use.`);
-    } finally {
-      setLoading(false);
+      authErrorMsg = err.message || "Failed to fetch";
+      console.warn("Cloud Supabase registration failed or offline. Falling back to local PostgreSQL backend...", err);
     }
+
+    // Fallback to local PostgreSQL database if cloud registration failed/offline
+    if (!registrationSuccess) {
+      try {
+        console.log("Attempting local backend registration...");
+        const res = await fetch('http://localhost:5000/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: registrationData.schoolEmail,
+            password: registrationData.password
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.details || errData.error || "Local server registration failed.");
+        }
+
+        const data = await res.json();
+        console.log("Local PostgreSQL registration successful:", data);
+        
+        // Seed local storage so other components know we registered on local offline fallback
+        localStorage.setItem('school_offline_admin_email', registrationData.schoolEmail);
+        registrationSuccess = true;
+      } catch (localErr: any) {
+        console.error("Both cloud and local registration failed:", localErr);
+        setLoading(false);
+        alert(`⚠️ Registration failed!\n\nCloud error: ${authErrorMsg}\nLocal DB error: ${localErr.message}\n\nPlease check your internet connection or check if your local Express server (node backend/server.js) is active.`);
+        return;
+      }
+    }
+
+    if (registrationSuccess) {
+      setStep('details');
+    }
+    setLoading(false);
   };
 
   const handleDetailsServiceStep = async () => {
@@ -200,6 +228,9 @@ export default function SchoolRegistrationModal({
     setLoading(true);
     console.log("Finalizing setup with template:", templateId);
     
+    let launchSuccess = false;
+    let cloudErrorMsg = "";
+
     try {
       let finalLogoUrl = detailsData.logoUrl;
       let finalImageUrl = detailsData.imageUrl;
@@ -208,20 +239,14 @@ export default function SchoolRegistrationModal({
       if (detailsData.logo) {
         const name = `${Date.now()}-logo`;
         const { error: uploadError } = await supabase.storage.from('school-assets').upload(name, detailsData.logo);
-        if (uploadError) {
-          console.error("Logo Upload Error:", uploadError);
-          throw uploadError;
-        }
+        if (uploadError) throw uploadError;
         finalLogoUrl = supabase.storage.from('school-assets').getPublicUrl(name).data.publicUrl;
       }
       
       if (detailsData.image) {
         const name = `${Date.now()}-hero`;
         const { error: uploadError } = await supabase.storage.from('school-assets').upload(name, detailsData.image);
-        if (uploadError) {
-          console.error("Hero Image Upload Error:", uploadError);
-          throw uploadError;
-        }
+        if (uploadError) throw uploadError;
         finalImageUrl = supabase.storage.from('school-assets').getPublicUrl(name).data.publicUrl;
       }
 
@@ -236,20 +261,69 @@ export default function SchoolRegistrationModal({
         template: templateId
       }).eq('email', registrationData.schoolEmail);
 
-      if (updateError) {
-        console.error("Finalization Database Error:", updateError);
-        throw updateError;
-      }
+      if (updateError) throw updateError;
       
       console.log("Launch Ready! Moving to success screen.");
+      launchSuccess = true;
+    } catch (err: any) {
+      cloudErrorMsg = err.message || "Failed to fetch";
+      console.warn("Cloud Supabase finalization failed or offline. Falling back to local PostgreSQL backend...", err);
+    }
+
+    // Fallback to local PostgreSQL database if cloud finalization failed/offline
+    if (!launchSuccess) {
+      try {
+        console.log("Attempting local backend finalization...");
+        
+        // 1. Save details and upload files locally via FormData
+        const formData = new FormData();
+        formData.append('email', registrationData.schoolEmail);
+        formData.append('name', registrationData.schoolName);
+        formData.append('tagline', detailsData.tagline);
+        formData.append('description', detailsData.description);
+        if (detailsData.logo) formData.append('logo', detailsData.logo);
+        if (detailsData.image) formData.append('image', detailsData.image);
+
+        const detailsRes = await fetch('http://localhost:5000/school-details', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!detailsRes.ok) {
+          const errData = await detailsRes.json().catch(() => ({}));
+          throw new Error(errData.details || errData.error || "Failed to save local details.");
+        }
+
+        // 2. Select Template locally
+        const templateRes = await fetch('http://localhost:5000/select-template', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: registrationData.schoolEmail,
+            template: templateId
+          })
+        });
+
+        if (!templateRes.ok) {
+          const errData = await templateRes.json().catch(() => ({}));
+          throw new Error(errData.details || errData.error || "Failed to select local template.");
+        }
+
+        console.log("Local PostgreSQL finalization successful!");
+        launchSuccess = true;
+      } catch (localErr: any) {
+        console.error("Both cloud and local finalization failed:", localErr);
+        setLoading(false);
+        alert(`⚠️ Finalization failed!\n\nCloud error: ${cloudErrorMsg}\nLocal DB error: ${localErr.message}\n\nPlease check your internet connection or if your local Express server is active.`);
+        return;
+      }
+    }
+
+    if (launchSuccess) {
       setSelectedTemplate(templateId);
       setStep('success');
-    } catch (err: any) {
-      console.error("Finalization Failed:", err);
-      alert(err.message || "Failed to finalize setup. Check the browser console (F12) for error codes.");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   if (!isOpen) return null;

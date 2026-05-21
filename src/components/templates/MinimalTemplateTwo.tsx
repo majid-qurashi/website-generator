@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
+import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
+import { ThemeConfig } from '@/types/theme';
 
 interface TemplateProps {
   onSelect?: () => void;
   data?: SchoolData;
   isFullPage?: boolean;
+  customTheme?: ThemeConfig;
 }
 
 const defaultData: SchoolData = {
@@ -19,93 +22,205 @@ const defaultData: SchoolData = {
   template: "template2"
 };
 
-export default function MinimalTemplateTwo({ onSelect, data = defaultData, isFullPage = false }: TemplateProps) {
+export default function MinimalTemplateTwo({ onSelect, data = defaultData, isFullPage = false, customTheme }: TemplateProps) {
   const school = data || defaultData;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  return (
-    <div className={`flex flex-col bg-stone-50 text-stone-900 ${!isFullPage ? 'border rounded-xl overflow-hidden shadow-sm h-[400px]' : 'min-h-screen'} font-serif`}>
-      
-      {/* Simple Centered Header */}
-      <nav className="bg-white border-b border-stone-200 px-6 py-6 md:px-12 flex flex-col md:flex-row justify-between items-center relative z-50 space-y-4 md:space-y-0">
-        <div className="flex items-center space-x-4 group cursor-pointer">
+  const context = useSchoolTheme();
+  const theme = customTheme || context?.theme || PRESETS['modern-blue'];
+
+  const isVisible = (sectionId: string) => theme.layout.sectionsVisibility[sectionId] !== false;
+
+  // Alignments helper
+  const textAlignmentClass = 
+    theme.layout.mainTextAlignment === 'center' ? 'text-center' : 
+    theme.layout.mainTextAlignment === 'right' ? 'text-right' : 'text-left';
+
+  const logoAlignClass = 
+    theme.layout.logoAlignment === 'center' ? 'mx-auto flex-col text-center' :
+    theme.layout.logoAlignment === 'right' ? 'ml-auto flex-row-reverse space-x-reverse' : 'flex-row';
+
+  // Hover animations classes
+  const hoverAnimClass = 
+    theme.components.hoverAnimation === 'scale-up' ? 'hover:scale-105 transform transition-transform' :
+    theme.components.hoverAnimation === 'opacity' ? 'hover:opacity-80 transition-opacity' :
+    theme.components.hoverAnimation === 'slide-up' ? 'hover:-translate-y-1 transform transition-transform' : '';
+
+  const transitionSpeedStyle = {
+    transitionDuration: theme.components.transitionSpeed || '300ms'
+  };
+
+  const renderNavbar = () => {
+    const isCenter = theme.layout.logoAlignment === 'center';
+    const isRight = theme.layout.logoAlignment === 'right';
+
+    const navbarClass = `z-50 transition-all ${
+      theme.layout.stickyNavbar ? 'sticky top-0' : 'relative'
+    } ${
+      theme.branding.bgBlur === 'sm' ? 'backdrop-blur-sm' :
+      theme.branding.bgBlur === 'md' ? 'backdrop-blur-md' :
+      theme.branding.bgBlur === 'lg' ? 'backdrop-blur-lg' : 'backdrop-blur-none'
+    } bg-theme-navbar border-b border-theme-border px-6 py-6 md:px-12 flex ${
+      isCenter 
+        ? 'flex-col items-center space-y-4 text-center' 
+        : isRight 
+          ? 'flex-col md:flex-row-reverse justify-between items-center space-y-4 md:space-y-0' 
+          : 'flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0'
+    }`;
+
+    const logoGroupClass = `flex items-center space-x-4 cursor-pointer select-none ${
+      isCenter ? 'flex-col items-center space-y-2' : ''
+    }`;
+
+    return (
+      <nav style={transitionSpeedStyle} className={navbarClass}>
+        <div className={logoGroupClass}>
           {school.logo ? (
-            <img src={school.logo} alt="Logo" className="w-10 h-10 rounded-full object-cover border border-emerald-100" />
+            <img 
+              src={school.logo} 
+              alt="Logo" 
+              style={{ height: theme.branding.logoSize }}
+              className="rounded-full object-cover border border-theme-border" 
+            />
           ) : (
-            <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-sm">G</div>
+            <div 
+              style={{ width: theme.branding.logoSize, height: theme.branding.logoSize }}
+              className="bg-theme-primary text-theme-btnText rounded-full flex items-center justify-center font-bold text-sm shadow"
+            >
+              {school.name ? school.name[0] : 'G'}
+            </div>
           )}
-          <span className="font-black text-lg md:text-2xl tracking-tight text-emerald-900 uppercase italic underline decoration-emerald-200 underline-offset-4">{school.name}</span>
+          <span 
+            style={{ fontFamily: theme.typography.headingFont }}
+            className="font-themeHeading font-black text-lg md:text-2xl tracking-tight text-theme-primary uppercase italic underline decoration-theme-secondary/35 underline-offset-4"
+          >
+            {school.name}
+          </span>
         </div>
 
         {/* Global Nav */}
-        <div className="hidden md:flex items-center space-x-12 text-sm font-black uppercase tracking-widest text-stone-400">
-           <span className="hover:text-emerald-600 cursor-pointer transition-colors">Campus</span>
-           <span className="hover:text-emerald-600 cursor-pointer transition-colors">Admissions</span>
-           <span className="hover:text-emerald-600 cursor-pointer transition-colors">Philosophy</span>
+        <div className="hidden md:flex items-center space-x-12 text-sm font-black uppercase tracking-widest text-theme-textMuted">
+           <span className="hover:text-theme-primary cursor-pointer transition-colors">Campus</span>
+           <span className="hover:text-theme-primary cursor-pointer transition-colors">Admissions</span>
+           <span className="hover:text-theme-primary cursor-pointer transition-colors">Philosophy</span>
         </div>
 
         {/* Simple Mobile Toggle */}
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden w-10 h-10 border border-stone-200 rounded-lg flex items-center justify-center bg-stone-50">
-           <div className={`w-4 h-4 rounded-sm transition-all ${isMenuOpen ? 'bg-emerald-600' : 'bg-stone-300'}`}></div>
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden w-10 h-10 border border-theme-border rounded-lg flex items-center justify-center bg-theme-cardBg">
+           <div className={`w-4 h-4 rounded-sm transition-all ${isMenuOpen ? 'bg-theme-primary' : 'bg-theme-textMuted/40'}`}></div>
         </button>
 
          {/* Mobile Menu Overlay */}
          {isMenuOpen && isFullPage && (
-          <div className="absolute top-full left-0 right-0 bg-white border-b border-stone-100 p-6 flex flex-col space-y-6 shadow-2xl md:hidden text-center">
-             <span className="font-black text-emerald-800">Campus</span>
-             <span className="font-black text-emerald-800">Admissions</span>
-             <span className="font-black text-emerald-800">Philosophy</span>
+          <div className="absolute top-full left-0 right-0 bg-theme-navbar border-b border-theme-border p-6 flex flex-col space-y-6 shadow-2xl md:hidden text-center z-50">
+             <span className="font-black text-theme-primary hover:text-theme-primaryHover cursor-pointer">Campus</span>
+             <span className="font-black text-theme-primary hover:text-theme-primaryHover cursor-pointer">Admissions</span>
+             <span className="font-black text-theme-primary hover:text-theme-primaryHover cursor-pointer">Philosophy</span>
           </div>
         )}
       </nav>
+    );
+  };
 
-      <div className={`${!isFullPage ? 'overflow-y-auto no-scrollbar' : ''}`}>
-        {/* Simple Hero Section */}
-        <header className="px-6 md:px-20 py-10 md:py-20">
-          <div className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] group/hero ${isFullPage ? 'h-[400px] md:h-[600px]' : 'aspect-video shadow-lg'}`}>
-            <img 
-              src={school.image || "https://picsum.photos/seed/school2/1200/800"} 
-              alt="School" 
-              className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover/hero:scale-110"
-            />
-            <div className="absolute inset-0 bg-emerald-950/20 mix-blend-multiply"></div>
-          </div>
-          <div className={`mt-8 md:mt-16 ${isFullPage ? 'text-center max-w-4xl mx-auto' : 'p-2'}`}>
-            <h1 className={`font-black tracking-tight leading-tight mb-8 text-emerald-950 ${isFullPage ? 'text-4xl md:text-8xl' : 'text-2xl'}`}>
-              {school.tagline}
-            </h1>
-          </div>
-        </header>
+  const renderHero = () => (
+    <header className="px-6 md:px-20 py-10 md:py-20">
+      <div className={`relative overflow-hidden rounded-theme group/hero ${isFullPage ? 'h-[400px] md:h-[600px]' : 'aspect-video shadow-theme'}`}>
+        <img 
+          src={school.image || "https://picsum.photos/seed/school2/1200/800"} 
+          alt="School" 
+          className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover/hero:scale-110"
+        />
+        <div 
+          style={{ opacity: theme.branding.overlayOpacity }}
+          className="absolute inset-0 bg-slate-950 mix-blend-multiply transition-opacity"
+        />
+      </div>
+      <div className={`mt-8 md:mt-16 ${isFullPage ? 'max-w-4xl mx-auto' : 'p-2'} ${textAlignmentClass}`}>
+        <h1 
+          style={{ fontFamily: theme.typography.headingFont, fontWeight: theme.typography.fontWeight }}
+          className={`font-themeHeading font-black tracking-tight leading-tight mb-8 text-theme-text uppercase ${isFullPage ? 'text-4xl md:text-8xl' : 'text-2xl'}`}
+        >
+          {school.tagline}
+        </h1>
+      </div>
+    </header>
+  );
 
-        {/* Minimal About Section */}
-        <section className={`px-6 md:px-20 py-20 bg-stone-100 border-y border-stone-200 mt-20 ${isFullPage ? '' : 'p-6'}`}>
-          <div className="max-w-4xl mx-auto">
-            <span className="font-black uppercase tracking-[0.4em] text-emerald-600 text-[10px] mb-8 block">Our Story</span>
-            <p className={`text-stone-700 leading-relaxed italic font-medium ${isFullPage ? 'text-xl md:text-3xl' : 'text-sm'}`}>
-              "{school.description}"
-            </p>
-          </div>
-        </section>
+  const renderAbout = () => (
+    <section className={`px-6 md:px-20 py-20 bg-theme-cardBg border-y border-theme-border mt-20 ${isFullPage ? '' : 'p-6'} ${textAlignmentClass}`}>
+      <div className="max-w-4xl mx-auto">
+        <span 
+          style={{ fontFamily: theme.typography.headingFont }}
+          className="font-themeHeading font-black uppercase tracking-[0.4em] text-theme-primary text-[10px] mb-8 block"
+        >
+          Our Story
+        </span>
+        <p 
+          style={{ fontFamily: theme.typography.bodyFont }}
+          className={`text-theme-textMuted leading-relaxed italic font-medium font-themeBody ${isFullPage ? 'text-xl md:text-3xl' : 'text-sm'}`}
+        >
+          "{school.description}"
+        </p>
+      </div>
+    </section>
+  );
 
-        {/* Classic Footer */}
-        <footer className="bg-stone-900 text-stone-500 py-24 px-12 text-center flex flex-col items-center">
-           <div className="w-12 h-0.5 bg-emerald-600 mb-12"></div>
-           <p className="font-bold text-xs md:text-sm tracking-widest uppercase">
-             Developed by <a href="https://qurashi.vercel.app" target="_blank" className="text-emerald-500 hover:text-white transition-colors underline underline-offset-8">Majid Qurashi</a>
-           </p>
-           <div className="mt-20 opacity-20 text-[10px] uppercase font-black tracking-[1em]">Eco Education 2026</div>
-        </footer>
+  const renderFooter = () => (
+    <footer className="bg-theme-footer text-theme-textMuted py-24 px-12 text-center flex flex-col items-center border-t border-theme-border">
+       <div className="w-12 h-0.5 bg-theme-primary mb-12"></div>
+       <p className="font-bold text-xs md:text-sm tracking-widest uppercase text-theme-textMuted">
+         Developed by <a href="https://qurashi.vercel.app" target="_blank" className="text-theme-primary hover:text-white transition-colors underline underline-offset-8 font-black">Majid Qurashi</a>
+       </p>
+       <div className="mt-20 opacity-20 text-[10px] uppercase font-black tracking-[1em] text-theme-text">Eco Education 2026</div>
+    </footer>
+  );
+
+  return (
+    <div 
+      style={{
+        lineHeight: theme.typography.lineHeight,
+        letterSpacing: theme.typography.letterSpacing === 'tight' ? '-0.025em' : theme.typography.letterSpacing === 'wide' ? '0.05em' : 'normal',
+      }}
+      className={`flex flex-col bg-theme-bg text-theme-text font-themeBody ${
+        !isFullPage ? 'border border-theme-border rounded-theme overflow-hidden shadow-theme h-[400px] relative' : 'min-h-screen'
+      }`}
+    >
+      
+      {/* Centered Header */}
+      {renderNavbar()}
+
+      <div className={`${!isFullPage ? 'overflow-y-auto no-scrollbar relative' : 'w-full flex-1 flex flex-col'}`}>
+        {/* Dynamic section ordering and rendering */}
+        {theme.layout.sectionsOrder.map((sectionId) => {
+          if (!isVisible(sectionId)) return null;
+          switch (sectionId) {
+            case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
+            case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
+            case 'footer': return <React.Fragment key="footer">{renderFooter()}</React.Fragment>;
+            default: return null;
+          }
+        })}
+
+        {/* Fade out (Only in Preview) */}
+        {!isFullPage && (
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-theme-bg to-transparent pointer-events-none" />
+        )}
       </div>
 
       {/* Select Overlay (Only in Preview) */}
       {!isFullPage && onSelect && (
-        <div className="absolute inset-0 bg-stone-900/40 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center pointer-events-none group">
-           <button onClick={(e) => { e.stopPropagation(); onSelect(); }} className="bg-emerald-600 text-white font-black px-10 py-4 rounded-full shadow-2xl transform scale-75 group-hover:scale-100 transition-all pointer-events-auto">
+        <div className="absolute inset-0 bg-theme-footer/85 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center pointer-events-none group z-[100] backdrop-blur-sm">
+           <button 
+             onClick={(e) => { e.stopPropagation(); onSelect(); }} 
+             style={transitionSpeedStyle}
+             className={`bg-theme-btnBg hover:bg-theme-primaryHover text-theme-btnText font-black px-10 py-4 shadow-2xl transform scale-75 group-hover:scale-100 transition-all pointer-events-auto ${theme.components.buttonStyle} ${hoverAnimClass}`}
+           >
              Select Minimal Green
            </button>
-           <p className="text-white text-[10px] mt-4 font-black tracking-widest animate-pulse">NATURAL SPACES</p>
+           <p className="text-theme-primary text-[10px] mt-4 font-black tracking-widest animate-pulse">NATURAL SPACES</p>
         </div>
       )}
     </div>
   );
 }
+

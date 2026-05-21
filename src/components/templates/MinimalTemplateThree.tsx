@@ -2,11 +2,14 @@
 
 import React, { useState } from 'react';
 import { SchoolData } from '@/types/school';
+import { useSchoolTheme, PRESETS } from '@/components/SchoolThemeProvider';
+import { ThemeConfig } from '@/types/theme';
 
 interface TemplateProps {
   onSelect?: () => void;
   data?: SchoolData;
   isFullPage?: boolean;
+  customTheme?: ThemeConfig;
 }
 
 const defaultData: SchoolData = {
@@ -19,97 +22,198 @@ const defaultData: SchoolData = {
   template: "template3"
 };
 
-export default function MinimalTemplateThree({ onSelect, data = defaultData, isFullPage = false }: TemplateProps) {
+export default function MinimalTemplateThree({ onSelect, data = defaultData, isFullPage = false, customTheme }: TemplateProps) {
   const school = data || defaultData;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  return (
-    <div className={`flex flex-col bg-slate-50 text-slate-900 ${!isFullPage ? 'border rounded-xl overflow-hidden shadow-sm h-[400px]' : 'min-h-screen'} font-sans`}>
-      
-      {/* Ultra Minimal Header */}
-      <nav className="bg-white border-b border-gray-200 px-6 py-6 md:px-16 flex justify-between items-center relative z-50">
-        <div className="flex items-center space-x-4">
+  const context = useSchoolTheme();
+  const theme = customTheme || context?.theme || PRESETS['modern-blue'];
+
+  const isVisible = (sectionId: string) => theme.layout.sectionsVisibility[sectionId] !== false;
+
+  // Alignments helper
+  const textAlignmentClass = 
+    theme.layout.mainTextAlignment === 'center' ? 'text-center' : 
+    theme.layout.mainTextAlignment === 'right' ? 'text-right' : 'text-left';
+
+  const logoAlignClass = 
+    theme.layout.logoAlignment === 'center' ? 'mx-auto flex-col text-center' :
+    theme.layout.logoAlignment === 'right' ? 'ml-auto flex-row-reverse space-x-reverse' : 'flex-row';
+
+  // Hover animations classes
+  const hoverAnimClass = 
+    theme.components.hoverAnimation === 'scale-up' ? 'hover:scale-105 transform transition-transform' :
+    theme.components.hoverAnimation === 'opacity' ? 'hover:opacity-80 transition-opacity' :
+    theme.components.hoverAnimation === 'slide-up' ? 'hover:-translate-y-1 transform transition-transform' : '';
+
+  const transitionSpeedStyle = {
+    transitionDuration: theme.components.transitionSpeed || '300ms'
+  };
+
+  const renderNavbar = () => {
+    const isCenter = theme.layout.logoAlignment === 'center';
+    const isRight = theme.layout.logoAlignment === 'right';
+
+    const navbarClass = `z-50 transition-all ${
+      theme.layout.stickyNavbar ? 'sticky top-0' : 'relative'
+    } ${
+      theme.branding.bgBlur === 'sm' ? 'backdrop-blur-sm' :
+      theme.branding.bgBlur === 'md' ? 'backdrop-blur-md' :
+      theme.branding.bgBlur === 'lg' ? 'backdrop-blur-lg' : 'backdrop-blur-none'
+    } bg-theme-navbar border-b border-theme-border px-6 py-6 md:px-16 flex items-center justify-between`;
+
+    return (
+      <nav style={transitionSpeedStyle} className={navbarClass}>
+        <div className={`flex items-center space-x-4 ${isCenter ? 'mx-auto' : ''}`}>
           {school.logo ? (
-            <img src={school.logo} alt="Logo" className="w-12 h-12 grayscale object-contain" />
+            <img src={school.logo} alt="Logo" style={{ height: theme.branding.logoSize }} className="object-contain" />
           ) : (
-            <div className="w-10 h-10 bg-slate-900 text-white flex items-center justify-center font-black text-xl">C</div>
+            <div 
+              style={{ width: theme.branding.logoSize, height: theme.branding.logoSize }}
+              className="bg-theme-primary text-theme-btnText flex items-center justify-center font-black text-xl"
+            >
+              {school.name ? school.name[0] : 'C'}
+            </div>
           )}
-          <span className="font-black text-xl md:text-3xl tracking-tighter uppercase whitespace-nowrap">{school.name}</span>
+          <span 
+            style={{ fontFamily: theme.typography.headingFont }}
+            className="font-themeHeading font-black text-xl md:text-3xl tracking-tighter uppercase whitespace-nowrap text-theme-text"
+          >
+            {school.name}
+          </span>
         </div>
 
         {/* Minimalist Nav */}
-        <div className="hidden md:flex space-x-12 text-sm font-black uppercase tracking-tighter text-slate-400">
-           <span className="hover:text-slate-950 transition-colors cursor-pointer">Academics</span>
-           <span className="hover:text-slate-950 transition-colors cursor-pointer">Community</span>
-           <span className="hover:text-slate-950 transition-colors cursor-pointer">Login</span>
-        </div>
+        {!isCenter && (
+          <div className="hidden md:flex space-x-12 text-sm font-black uppercase tracking-tighter text-theme-textMuted">
+             <span className="hover:text-theme-primary transition-colors cursor-pointer">Academics</span>
+             <span className="hover:text-theme-primary transition-colors cursor-pointer">Community</span>
+             <span className="hover:text-theme-primary transition-colors cursor-pointer">Login</span>
+          </div>
+        )}
 
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden flex flex-col space-y-1.5 p-2 bg-slate-50 rounded-lg">
-           <div className="w-6 h-1 bg-slate-900"></div>
-           <div className="w-6 h-1 bg-slate-900"></div>
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden flex flex-col space-y-1.5 p-2 bg-theme-cardBg rounded-lg">
+           <div className="w-6 h-1 bg-theme-text"></div>
+           <div className="w-6 h-1 bg-theme-text"></div>
         </button>
 
          {/* Mobile Menu Overlay */}
          {isMenuOpen && isFullPage && (
-          <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 p-8 flex flex-col space-y-8 shadow-2xl md:hidden font-black uppercase">
-             <span className="text-slate-950">Academics</span>
-             <span className="text-slate-950">Community</span>
-             <span className="text-slate-950">Login</span>
+          <div className="absolute top-full left-0 right-0 bg-theme-navbar border-b border-theme-border p-8 flex flex-col space-y-8 shadow-2xl md:hidden font-black uppercase z-50">
+             <span className="text-theme-text hover:text-theme-primary cursor-pointer">Academics</span>
+             <span className="text-theme-text hover:text-theme-primary cursor-pointer">Community</span>
+             <span className="text-theme-text hover:text-theme-primary cursor-pointer">Login</span>
           </div>
         )}
       </nav>
+    );
+  };
 
-      <div className={`${!isFullPage ? 'overflow-y-auto no-scrollbar' : ''}`}>
-        {/* Simple Hero Section */}
-        <section className={`transition-all ${isFullPage ? 'p-6 md:p-16' : 'p-4'}`}>
-          <div className={`overflow-hidden rounded-3xl md:rounded-[4rem] group/hero ${isFullPage ? 'h-[400px] md:h-[700px]' : 'aspect-video shadow-xl'}`}>
-            <img 
-              src={school.image || "https://picsum.photos/seed/school3/1200/800"} 
-              alt="School" 
-              className="w-full h-full object-cover brightness-90 grayscale-[0.5] hover:grayscale-0 transition-all duration-1000"
-            />
+  const renderHero = () => (
+    <section className={`transition-all ${isFullPage ? 'p-6 md:p-16' : 'p-4'}`}>
+      <div className={`overflow-hidden rounded-theme group/hero ${isFullPage ? 'h-[400px] md:h-[700px]' : 'aspect-video shadow-theme'}`}>
+        <img 
+          src={school.image || "https://picsum.photos/seed/school3/1200/800"} 
+          alt="School" 
+          className="w-full h-full object-cover transition-all duration-1000"
+        />
+      </div>
+      <div className={`mt-8 md:mt-16 ${isFullPage ? 'max-w-5xl mx-auto' : 'p-2'} ${textAlignmentClass}`}>
+        <h1 
+          style={{ fontFamily: theme.typography.headingFont, fontWeight: theme.typography.fontWeight }}
+          className={`font-themeHeading font-black tracking-tighter leading-[0.9] mb-12 text-theme-text uppercase italic ${isFullPage ? 'text-6xl md:text-9xl' : 'text-3xl'}`}
+        >
+          {school.tagline}
+        </h1>
+      </div>
+    </section>
+  );
+
+  const renderAbout = () => (
+    <section className={`px-6 md:px-16 py-24 pb-48 max-w-7xl mx-auto ${isFullPage ? '' : 'p-8'} ${textAlignmentClass}`}>
+       <div className="flex flex-col md:flex-row gap-16 md:gap-32">
+          <div className="md:w-1/3">
+             <h2 
+               style={{ fontFamily: theme.typography.headingFont }}
+               className="text-4xl font-black uppercase tracking-tighter text-theme-text mb-8 pb-4 border-b-8 border-theme-primary font-themeHeading"
+             >
+               About
+             </h2>
           </div>
-          <div className={`mt-8 md:mt-16 ${isFullPage ? 'max-w-5xl mx-auto' : 'p-2'}`}>
-            <h1 className={`font-black tracking-tighter leading-[0.9] mb-12 text-slate-950 uppercase italic ${isFullPage ? 'text-6xl md:text-9xl' : 'text-3xl'}`}>
-              {school.tagline}
-            </h1>
+          <div className="md:w-2/3">
+             <p 
+               style={{ fontFamily: theme.typography.bodyFont }}
+               className={`text-theme-textMuted leading-tight font-bold font-themeBody ${isFullPage ? 'text-2xl md:text-3xl' : 'text-base'}`}
+             >
+                {school.description}
+             </p>
           </div>
-        </section>
+       </div>
+    </section>
+  );
 
-        {/* Minimal About Section */}
-        <section className={`px-6 md:px-16 py-24 pb-48 max-w-7xl mx-auto ${isFullPage ? '' : 'p-8'}`}>
-           <div className="flex flex-col md:flex-row gap-16 md:gap-32">
-              <div className="md:w-1/3">
-                 <h2 className="text-4xl font-black uppercase tracking-tighter text-slate-900 mb-8 pb-4 border-b-8 border-slate-900">About</h2>
-              </div>
-              <div className="md:w-2/3">
-                 <p className={`text-slate-600 leading-tight font-bold ${isFullPage ? 'text-2xl md:text-3xl' : 'text-base'}`}>
-                    {school.description}
-                 </p>
-              </div>
-           </div>
-        </section>
+  const renderFooter = () => (
+    <footer className="bg-theme-navbar border-t border-theme-border py-32 px-16">
+       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-12 md:space-y-0">
+          <div 
+            style={{ fontFamily: theme.typography.headingFont }}
+            className="text-4xl font-black italic tracking-tighter opacity-10 text-theme-text font-themeHeading"
+          >
+            {school.name}
+          </div>
+          <p className="font-black text-xs md:text-base tracking-[0.5em] uppercase text-theme-textMuted text-center md:text-right">
+            Developed by <br/> <a href="https://qurashi.vercel.app" target="_blank" className="text-theme-primary hover:text-theme-primaryHover transition-colors underline underline-offset-8 mt-4 inline-block">Majid Qurashi</a>
+          </p>
+       </div>
+    </footer>
+  );
 
-        {/* Classic Footer */}
-        <footer className="bg-white border-t border-slate-200 py-32 px-16">
-           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-12 md:space-y-0">
-              <div className="text-4xl font-black italic tracking-tighter opacity-10">{school.name}</div>
-              <p className="font-black text-xs md:text-base tracking-[0.5em] uppercase text-slate-400 text-center md:text-right">
-                Developed by <br/> <a href="https://qurashi.vercel.app" target="_blank" className="text-slate-950 hover:text-blue-600 transition-colors underline underline-offset-8 mt-4 inline-block">Majid Qurashi</a>
-              </p>
-           </div>
-        </footer>
+  return (
+    <div 
+      style={{
+        lineHeight: theme.typography.lineHeight,
+        letterSpacing: theme.typography.letterSpacing === 'tight' ? '-0.025em' : theme.typography.letterSpacing === 'wide' ? '0.05em' : 'normal',
+      }}
+      className={`flex flex-col bg-theme-bg text-theme-text font-themeBody ${
+        !isFullPage ? 'border border-theme-border rounded-theme overflow-hidden shadow-theme h-[400px] relative' : 'min-h-screen'
+      }`}
+    >
+      
+      {/* Ultra Minimal Header */}
+      {renderNavbar()}
+
+      <div className={`${!isFullPage ? 'overflow-y-auto no-scrollbar relative' : 'w-full flex-1 flex flex-col'}`}>
+        
+        {theme.layout.sectionsOrder.map((sectionId) => {
+          if (!isVisible(sectionId)) return null;
+          switch (sectionId) {
+            case 'hero': return <React.Fragment key="hero">{renderHero()}</React.Fragment>;
+            case 'about': return <React.Fragment key="about">{renderAbout()}</React.Fragment>;
+            case 'footer': return <React.Fragment key="footer">{renderFooter()}</React.Fragment>;
+            default: return null;
+          }
+        })}
+
+        {/* Fade Out (Only in Preview) */}
+        {!isFullPage && (
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-theme-bg to-transparent pointer-events-none" />
+        )}
       </div>
 
       {/* Select Overlay (Only in Preview) */}
       {!isFullPage && onSelect && (
-        <div className="absolute inset-0 bg-slate-950/60 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center pointer-events-none group">
-           <button onClick={(e) => { e.stopPropagation(); onSelect(); }} className="bg-white text-slate-950 font-black px-12 py-5 rounded-2xl shadow-2xl transform scale-[0.8] group-hover:scale-100 transition-all pointer-events-auto">
+        <div className="absolute inset-0 bg-theme-footer/85 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center pointer-events-none group z-[100] backdrop-blur-sm">
+           <button 
+             onClick={(e) => { e.stopPropagation(); onSelect(); }} 
+             style={transitionSpeedStyle}
+             className={`bg-theme-btnBg text-theme-btnText font-black px-12 py-5 shadow-2xl transform scale-[0.8] group-hover:scale-100 transition-all pointer-events-auto ${theme.components.buttonStyle} ${hoverAnimClass}`}
+           >
              Select Minimal Style
            </button>
-           <p className="text-slate-300 text-[10px] mt-6 font-black tracking-[0.5em] uppercase">PURE MINIMALISM</p>
+           <p className="text-theme-primary text-[10px] mt-6 font-black tracking-[0.5em] uppercase animate-pulse">PURE MINIMALISM</p>
         </div>
       )}
     </div>
   );
 }
+

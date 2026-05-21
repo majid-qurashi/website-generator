@@ -67,5 +67,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## Developer
 
 **Majid Qurashi**
-- **Portfolio:** [qurashi.vercel.app](https://qurashi.vercel.app)
+- **Portfolio:** [qurashi.vercel.app](https://ermajid.vercel.app)
 - **Role:** Full Stack Developer

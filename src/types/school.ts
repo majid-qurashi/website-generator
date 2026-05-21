@@ -1,3 +1,5 @@
+import { ThemeConfig } from './theme';
+
 export interface SchoolData {
   id?: number;
   email: string;
@@ -8,4 +10,6 @@ export interface SchoolData {
   image: string | null;
   template: string | null;
   password?: string;
+  theme_settings?: ThemeConfig | null;
 }
+

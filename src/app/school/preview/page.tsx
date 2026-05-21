@@ -9,6 +9,7 @@ import TemplateOne from '@/components/templates/TemplateOne';
 import TemplateTwo from '@/components/templates/TemplateTwo';
 import TemplateThree from '@/components/templates/TemplateThree';
 import { SchoolData } from '@/types/school';
+import { SchoolThemeProvider } from '@/components/SchoolThemeProvider';
 
 export default function PreviewPage() {
   const [data, setData] = useState<SchoolData | null>(null);
@@ -52,14 +53,16 @@ export default function PreviewPage() {
   };
 
   return (
-    <div className="relative">
-      {/* Preview Banner */}
-      <div className="fixed top-0 left-0 right-0 h-10 bg-indigo-600 text-white flex items-center justify-center text-xs font-bold uppercase tracking-widest z-[9999] shadow-lg">
-        ✨ Live Preview Mode — This is how your site will look! ✨
+    <SchoolThemeProvider initialThemeData={data.theme_settings}>
+      <div className="relative">
+        {/* Preview Banner */}
+        <div className="fixed top-0 left-0 right-0 h-10 bg-indigo-600 text-white flex items-center justify-center text-xs font-bold uppercase tracking-widest z-[9999] shadow-lg">
+          ✨ Live Preview Mode — This is how your site will look! ✨
+        </div>
+        <div className="pt-10">
+          {renderTemplate()}
+        </div>
       </div>
-      <div className="pt-10">
-        {renderTemplate()}
-      </div>
-    </div>
+    </SchoolThemeProvider>
   );
 }
